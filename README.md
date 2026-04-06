@@ -1,9 +1,11 @@
+> 🏆 **Supported by the [OpenAI Cybersecurity Grant](https://openai.com/security)** — awarded to projects advancing AI-powered cyber defense.
+
 # Teger AI 🛡️
 > AI-powered social engineering & phishing detection for Gmail and Slack
 > Supported by the OpenAI Cybersecurity Grant
 
 ## How It Works
-Teger AI uses OpenAI's GPT-4o to perform forensic linguistic analysis on messages,
+Teger AI is Powered by OpenAI to perform forensic linguistic analysis on messages,
 detecting psychological manipulation tactics like artificial urgency, authority spoofing,
 and emotional anchoring — the techniques behind modern social engineering attacks.
 
