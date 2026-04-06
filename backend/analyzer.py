@@ -21,7 +21,7 @@ def analyze_message(content: str, context: str = "") -> dict:
             },
             {
                 "role": "user",
-                "content": f"Platform context: {context}\\n\\nMessage to analyze:\\n{content}",
+                "content": f"Platform context: {context}\n\nMessage to analyze:\n{content}",
             },
         ],
         response_format={"type": "json_object"},

@@ -1,5 +1,5 @@
 const TEGER_API_BASE = "https://your-render-backend.onrender.com";
-// Set this to your deployed Render backend URL before loading the extension.
+// Set this to your deployed Render backend URL before loading or packaging the extension for Chrome Web Store submission.
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type !== "ANALYZE_MESSAGE") {
