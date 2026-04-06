@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  width: 340px;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+main {
+  padding: 12px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+button {
+  width: 100%;
+  margin: 8px 0 12px;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 600;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #475569;
+  cursor: not-allowed;
+}
+
+p {
+  margin: 6px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}

@@ -1,21 +1,33 @@
 {
   "manifest_version": 3,
-  "name": "Teger AI: Forensic Sensor",
+  "name": "Teger AI",
   "version": "1.0.0",
-  "description": "Uncover social engineering using Gemini 3 reasoning.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "description": "AI-powered social engineering and phishing detection for Gmail and Slack.",
+  "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": [
     "https://mail.google.com/*",
-    "https://app.slack.com/*",
-    "http://localhost:8000/*"
+    "https://app.slack.com/*"
   ],
-  "action": {
-    "default_popup": "popup.html"
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*", "https://app.slack.com/*"],
       "js": ["content.js"]
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }

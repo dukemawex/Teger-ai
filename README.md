@@ -1,70 +1,71 @@
-Teger AI: Advanced Social Engineering Detection
+# Teger AI 🛡️
+> AI-powered social engineering & phishing detection for Gmail and Slack
+> Supported by the OpenAI Cybersecurity Grant
 
-Teger AI (derived from the Latin detegere — to uncover) is a cognitive security intelligence engine built to unmask psychological manipulation in enterprise communications.
+## How It Works
+Teger AI uses OpenAI's GPT-4o to perform forensic linguistic analysis on messages,
+detecting psychological manipulation tactics like artificial urgency, authority spoofing,
+and emotional anchoring — the techniques behind modern social engineering attacks.
 
- Teger AI moves beyond static keyword filtering by utilizing Gemini 3's High-Reasoning (Thinking) capabilities to analyze the "Dissonance" between a sender's claimed identity and their actual intent.
+## Architecture
+See [docs/architecture.md](docs/architecture.md)
 
-🛡️ The Inspiration
+## Quick Start
 
-In September 2023, the MGM Resorts hack proved that even the most secure companies can be brought down by a 10-minute conversation. Attackers don't "hack in" anymore; they "log in" by exploiting human empathy, urgency, and fear.
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- An OpenAI API key → https://platform.openai.com/api-keys
+- A Render account (free tier works) → https://render.com
+- Chrome browser
 
-Teger AI was built to stop Linguistic Dissonance—the subtle gap between an attacker's tone and their claimed identity. When a "CEO" sends a panicked message asking for gift cards, Teger AI's reasoning engine catches the mismatch that traditional security filters miss.
+### 1. Clone
+git clone https://github.com/dukemawex/Teger-ai.git
+cd Teger-ai
 
-🚀 Key Features
+### 2. Backend (Local Dev)
+cd backend
+cp .env.example .env
+# Add your OPENAI_API_KEY to .env
+pip install -r requirements.txt
+uvicorn app:app --reload
+# API runs at http://localhost:8000
 
-Linguistic Dissonance Engine: Detects tonal shifts and "Authority Drift" using Gemini 3's deep reasoning.
+### 3. Backend (Render Production)
+- Push repo to GitHub
+- Go to https://render.com → New Web Service → connect this repo
+- Set root directory to /backend
+- Render auto-detects render.yaml
+- Add OPENAI_API_KEY and ALLOWED_ORIGINS in Render's Environment tab
+- Deploy — your backend URL will be https://teger-ai-backend.onrender.com
 
-Contextual Intent Analysis: Evaluates high-risk requests (financial transfers, credential resets) against platform norms.
+### 4. Dashboard
+cd dashboard
+cp .env.example .env
+# Set REACT_APP_API_URL to your Render backend URL
+npm install
+npm start
+# Dashboard runs at http://localhost:3000
 
-In-Browser Sensor Layer: A Chrome Extension that injects scanning capabilities directly into Gmail and Slack.
+### 5. Chrome Extension
+- Open chrome://extensions in Chrome
+- Enable Developer Mode (top right toggle)
+- Click "Load Unpacked" → select the /extension folder
+- Open extension/background.js and set TEGER_API_BASE to your Render backend URL
 
-SOC Forensic Lab: A standalone React dashboard for detailed threat auditing and reasoning visualization.
+### Chrome Web Store Submission
+cd extension
+zip -r ../teger-ai-extension.zip .
+# Upload zip at https://chrome.google.com/webstore/devconsole
 
-🛠️ Technical Stack
+## API Reference
+See [docs/api-reference.md](docs/api-reference.md)
 
-AI Engine: Gemini 3 Pro / Gemini 2.5 Flash
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-Extension: Chrome Extension API (Manifest V3)
+## Security
+See [SECURITY.md](SECURITY.md) — please report vulnerabilities responsibly
 
-Frontend: React + Tailwind CSS
-
-Reasoning Architecture: Forensic Linguistic Prompting + High Thinking Levels
-
-📂 Repository Structure
-
-teger-ai/
-├── extension/       # Chrome Extension (The "Sensor")
-├── dashboard/       # SOC Analysis Lab (The "Brain")
-├── docs/            # Architecture diagrams & research notes
-├── LICENSE          # MIT License
-└── README.md        # Project Documentation
-
-
-🔧 Setup & Installation
-
-Chrome Extension
-
-Clone this repository.
-
-Open Chrome and navigate to chrome://extensions/.
-
-Enable Developer Mode (top right).
-
-Click Load Unpacked and select the /extension folder from this repo.
-
-SOC Dashboard (Local Development)
-
-Navigate to the /dashboard directory.
-
-Install dependencies: npm install
-
-Start the lab: npm start
-
-🧠 Why Gemini 3?
-
-Social engineering is a human-centric attack. Teger AI utilizes Gemini 3’s High Thinking Levels to simulate the logical flow of a human forensic linguist. By analyzing "Dark Patterns" like artificial urgency, power dynamics, and emotional anchoring, Teger AI provides a defense layer that evolves alongside modern attack vectors.
-
-⚖️ License
-
-Distributed under the MIT License. See LICENSE for more information.
-
+## License
+MIT — See [LICENSE](LICENSE)

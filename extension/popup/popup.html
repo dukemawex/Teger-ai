@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teger AI</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Teger AI</h1>
+      <p id="status">No message captured yet.</p>
+      <button id="scan-btn">Analyze Captured Message</button>
+
+      <section id="results" hidden>
+        <p><strong>Threat Level:</strong> <span id="threat-level">-</span></p>
+        <p><strong>Confidence:</strong> <span id="confidence">-</span></p>
+        <p><strong>Tactics:</strong> <span id="tactics">-</span></p>
+        <p><strong>Reasoning:</strong> <span id="reasoning">-</span></p>
+        <p><strong>Recommended Action:</strong> <span id="recommended-action">-</span></p>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
