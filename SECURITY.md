@@ -3,7 +3,7 @@
 ## Reporting a Vulnerability
 Please do NOT open a public GitHub issue for security vulnerabilities.
 
-Email: [your-email@domain.com]
+Email: [stardukeza@gmail.com]
 
 We will acknowledge within 48 hours and aim to patch within 14 days.
 
