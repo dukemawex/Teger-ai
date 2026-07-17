@@ -7,3 +7,4 @@ extension/dist/
 *.zip
 *.pyc
 .DS_Store
+dataset/export.json

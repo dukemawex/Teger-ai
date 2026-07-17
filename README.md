@@ -1,7 +1,8 @@
 > 🏆 **Supported by the [OpenAI Cybersecurity Grant](https://openai.com/security)** — awarded to projects advancing AI-powered cyber defense.
 
 # Teger AI 🛡️
-> AI-powered social engineering & phishing detection for Gmail and Slack
+> A browser & email plugin that highlights social-engineering cues, explains its reasoning,
+> and builds an open dataset of phishing patterns.
 > Supported by the OpenAI Cybersecurity Grant
 
 ## How It Works
@@ -59,6 +60,22 @@ npm start
 cd extension
 zip -r ../teger-ai-extension.zip .
 # Upload zip at https://chrome.google.com/webstore/devconsole
+
+## Open Phishing-Pattern Dataset
+
+Teger AI ships an **open, extensible dataset of phishing patterns** in [`/dataset`](dataset/README.md):
+the social-engineering tactics behind modern attacks, each with concrete linguistic cues and a
+plain-language explanation of *why* it is manipulation. Detector and dataset share one taxonomy
+([`dataset/taxonomy.py`](dataset/taxonomy.py)), so a detected tactic maps directly to a documented
+pattern — this is what lets the plugin **explain its reasoning** instead of just flagging.
+
+```bash
+python dataset/schema.py   # validate the dataset
+python dataset/stats.py    # coverage by tactic / severity / source
+```
+
+Patterns are sanitized or synthetic (safe to publish). Contributions welcome —
+see [CONTRIBUTING.md](CONTRIBUTING.md#contributing-phishing-patterns).
 
 ## API Reference
 See [docs/api-reference.md](docs/api-reference.md)
