@@ -102,6 +102,7 @@ export default function App() {
       threatLevel: analysis.threat_level,
       confidence: analysis.confidence,
       tactics: analysis.tactics || [],
+      signals: analysis.signals || [],
       feedback: null,
     };
     const next = [entry, ...history].slice(0, 50);
@@ -267,6 +268,19 @@ export default function App() {
                     ))
                   ) : (
                     <p>No known tactic detected.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="result-section">
+                <span className="eyebrow">DETERMINISTIC SIGNALS</span>
+                <div className="chips">
+                  {(result.signals || []).length ? (
+                    result.signals.map((signal) => (
+                      <span key={signal}>{titleCase(signal)}</span>
+                    ))
+                  ) : (
+                    <p>No deterministic risk signal detected.</p>
                   )}
                 </div>
               </div>
