@@ -1,90 +1,113 @@
-> 🏆 **Supported by the [OpenAI Cybersecurity Grant](https://openai.com/security)** — awarded to projects advancing AI-powered cyber defense.
+> 🏆 **Supported by the OpenAI Cybersecurity Grant** — awarded to projects advancing AI-powered cyber defense.
 
 # Teger AI 🛡️
-> A browser & email plugin that highlights social-engineering cues, explains its reasoning,
-> and builds an open dataset of phishing patterns.
-> Supported by the OpenAI Cybersecurity Grant
 
-## How It Works
-Teger AI is Powered by OpenAI to perform forensic linguistic analysis on messages,
-detecting psychological manipulation tactics like artificial urgency, authority spoofing,
-and emotional anchoring — the techniques behind modern social engineering attacks.
+**MVP v0.2 — Private Beta**
+
+Teger AI is an explainable social-engineering defense layer for suspicious email and chat messages. It detects manipulation tactics, surfaces the concrete cues behind the warning, and gives the user a safe next action.
+
+## What the MVP does
+
+- Scans user-selected Gmail and Slack messages
+- Detects social-engineering tactics using a shared threat taxonomy
+- Extracts deterministic risk signals before AI analysis
+- Treats message content as untrusted attacker-controlled data
+- Returns risk level, confidence, tactics, cues, reasoning, and recommended action
+- Uses signed anonymous installation tokens instead of exposing provider credentials
+- Applies per-installation and per-IP scan rate limits
+- Stores local scan history as metadata only; raw message text is not added to browser history
+- Includes a security-console dashboard for manual analysis and local feedback
 
 ## Architecture
-See [docs/architecture.md](docs/architecture.md)
+
+See docs/architecture.md.
 
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.10+
 - Node.js 18+
-- An OpenAI API key → https://platform.openai.com/api-keys
-- A Render account (free tier works) → https://render.com
-- Chrome browser
+- An OpenAI API key
+- Chrome
 
 ### 1. Clone
-git clone https://github.com/dukemawex/Teger-ai.git
-cd Teger-ai
 
-### 2. Backend (Local Dev)
-cd backend
-cp .env.example .env
-# Add your OPENAI_API_KEY to .env
-pip install -r requirements.txt
-uvicorn app:app --reload
-# API runs at http://localhost:8000
+    git clone https://github.com/dukemawex/Teger-ai.git
+    cd Teger-ai
 
-### 3. Backend (Render Production)
-- Push repo to GitHub
-- Go to https://render.com → New Web Service → connect this repo
-- Set root directory to /backend
-- Render auto-detects render.yaml
-- Add OPENAI_API_KEY and ALLOWED_ORIGINS in Render's Environment tab
-- Deploy — your backend URL will be https://teger-ai-backend.onrender.com
+### 2. Backend
 
-### 4. Dashboard
-cd dashboard
-cp .env.example .env
-# Set REACT_APP_API_URL to your Render backend URL
-npm install
-npm start
-# Dashboard runs at http://localhost:3000
+    cd backend
+    cp .env.example .env
+    pip install -r requirements.txt
 
-### 5. Chrome Extension
-- Open chrome://extensions in Chrome
-- Enable Developer Mode (top right toggle)
-- Click "Load Unpacked" → select the /extension folder
-- Open extension/background.js and set TEGER_API_BASE to your Render backend URL
+Set at minimum:
 
-### Chrome Web Store Submission
-cd extension
-zip -r ../teger-ai-extension.zip .
-# Upload zip at https://chrome.google.com/webstore/devconsole
+    OPENAI_API_KEY=...
+    APP_SECRET=use-a-long-random-secret
+    ALLOWED_ORIGINS=http://localhost:3000
 
-## Open Phishing-Pattern Dataset
+Then run:
 
-Teger AI ships an **open, extensible dataset of phishing patterns** in [`/dataset`](dataset/README.md):
-the social-engineering tactics behind modern attacks, each with concrete linguistic cues and a
-plain-language explanation of *why* it is manipulation. Detector and dataset share one taxonomy
-([`dataset/taxonomy.py`](dataset/taxonomy.py)), so a detected tactic maps directly to a documented
-pattern — this is what lets the plugin **explain its reasoning** instead of just flagging.
+    uvicorn app:app --reload
 
-```bash
-python dataset/schema.py   # validate the dataset
-python dataset/stats.py    # coverage by tactic / severity / source
-```
+The API starts at http://localhost:8000.
 
-Patterns are sanitized or synthetic (safe to publish). Contributions welcome —
-see [CONTRIBUTING.md](CONTRIBUTING.md#contributing-phishing-patterns).
+### 3. Dashboard
+
+    cd dashboard
+    cp .env.example .env
+    npm install
+    npm start
+
+Set REACT_APP_API_URL to the backend URL.
+
+### 4. Chrome Extension
+
+- Open chrome://extensions
+- Enable Developer Mode
+- Choose **Load unpacked**
+- Select the extension directory
+- Open Gmail or Slack and use **Scan with Teger AI**
+
+The extension defaults to https://teger-ai-backend.onrender.com. For local development, set an apiBase value in extension local storage to http://localhost:8000.
+
+## API protection
+
+The browser extension never contains the OpenAI API key. It first obtains a signed anonymous installation token from POST /installations, then sends that token as a Bearer token to POST /analyze.
+
+The backend also limits requests by both installation and source IP.
+
+## Open phishing-pattern dataset
+
+Teger ships an open, extensible dataset of social-engineering patterns in the dataset directory. Detector and dataset share one taxonomy, so a detected tactic maps directly to a documented pattern.
+
+    python dataset/schema.py
+    python dataset/stats.py
+
+Patterns are sanitized or synthetic. Contributions must not include victim data, credentials, or live malicious links.
+
+## Tests
+
+    pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+    python -m pytest -q backend/
+    python -m pytest -q dataset/
+
+GitHub Actions runs backend linting, backend regression tests, dashboard build checks, secret scanning, and dataset validation.
+
+## Privacy
+
+See PRIVACY.md. Teger analyzes only content the user explicitly submits. The MVP does not persist raw message text in its local scan history.
 
 ## API Reference
-See [docs/api-reference.md](docs/api-reference.md)
 
-## Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See docs/api-reference.md.
 
 ## Security
-See [SECURITY.md](SECURITY.md) — please report vulnerabilities responsibly
+
+See SECURITY.md and docs/threat-model.md.
 
 ## License
-MIT — See [LICENSE](LICENSE)
+
+MIT — See LICENSE.
