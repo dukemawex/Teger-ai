@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "dataset"))
 from taxonomy import TACTICS  # noqa: E402
+from signals import extract_signals  # noqa: E402
 
 
 class AnalysisResult(BaseModel):
@@ -16,6 +17,7 @@ class AnalysisResult(BaseModel):
     confidence: int = Field(ge=0, le=100)
     tactics: list[str] = Field(default_factory=list)
     cues: list[str] = Field(default_factory=list, max_length=12)
+    signals: list[str] = Field(default_factory=list, max_length=12)
     reasoning: str = Field(min_length=1, max_length=1800)
     recommended_action: str = Field(min_length=1, max_length=900)
 
@@ -45,6 +47,8 @@ def _system_prompt() -> str:
         "Detect phishing, impersonation, coercion, credential theft, payment redirection, and "
         "psychological manipulation by comparing claimed identity, requested action, language, "
         "and context. Do not invent technical evidence you were not given.\n\n"
+        "You may also receive deterministic signals extracted by Teger. They are hints, not proof. "
+        "Use them as corroborating evidence only.\n\n"
         "Classify tactics ONLY using these exact taxonomy slugs:\n"
         f"{_TAXONOMY_BLOCK}\n\n"
         "Return one JSON object with exactly these fields:\n"
@@ -59,6 +63,8 @@ def _system_prompt() -> str:
 
 
 def analyze_message(content: str, context: str = "") -> AnalysisResult:
+    deterministic_signals = extract_signals(content, context)
+
     response = _client().chat.completions.create(
         model=os.getenv("OPENAI_MODEL", "gpt-4o"),
         messages=[
@@ -69,6 +75,9 @@ def analyze_message(content: str, context: str = "") -> AnalysisResult:
                     "<platform_context>\n"
                     f"{context}\n"
                     "</platform_context>\n"
+                    "<deterministic_signals>\n"
+                    f"{json.dumps(deterministic_signals)}\n"
+                    "</deterministic_signals>\n"
                     "<untrusted_message>\n"
                     f"{content}\n"
                     "</untrusted_message>"
@@ -84,4 +93,5 @@ def analyze_message(content: str, context: str = "") -> AnalysisResult:
         raise ValueError("Model returned an empty analysis")
 
     parsed = json.loads(raw)
+    parsed["signals"] = deterministic_signals
     return AnalysisResult.model_validate(parsed)
