@@ -19,7 +19,11 @@ from analyzer import AnalysisResult, analyze_message  # noqa: E402
 
 app = FastAPI(title="Teger AI Backend", version="0.2.0")
 
-origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",") if origin.strip()]
+origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -29,6 +33,7 @@ app.add_middleware(
 
 APP_SECRET = os.getenv("APP_SECRET", "")
 RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "10"))
+REGISTRATION_RATE_LIMIT_PER_MINUTE = int(os.getenv("REGISTRATION_RATE_LIMIT_PER_MINUTE", "30"))
 _rate_windows: dict[str, deque[float]] = defaultdict(deque)
 
 
@@ -52,36 +57,56 @@ def _require_secret() -> bytes:
 
 
 def _sign_installation(installation_id: str) -> str:
-    signature = hmac.new(_require_secret(), installation_id.encode("utf-8"), hashlib.sha256).digest()
+    signature = hmac.new(
+        _require_secret(),
+        installation_id.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
     encoded = base64.urlsafe_b64encode(signature).decode("ascii").rstrip("=")
     return f"{installation_id}.{encoded}"
 
 
 def _verify_token(authorization: str | None = Header(default=None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing installation token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing installation token.",
+        )
 
     token = authorization.removeprefix("Bearer ").strip()
     try:
-        installation_id, signature = token.split(".", 1)
+        installation_id, _signature = token.split(".", 1)
         uuid.UUID(installation_id)
     except (ValueError, AttributeError):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid installation token.") from None
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid installation token.",
+        ) from None
 
     expected = _sign_installation(installation_id)
     if not hmac.compare_digest(token, expected):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid installation token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid installation token.",
+        )
     return installation_id
 
 
-def _enforce_rate_limit(key: str) -> None:
+def _enforce_rate_limit(key: str, limit: int) -> None:
     now = time.monotonic()
     window = _rate_windows[key]
     while window and now - window[0] >= 60:
         window.popleft()
-    if len(window) >= RATE_LIMIT_PER_MINUTE:
-        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Scan limit reached. Try again shortly.")
+    if len(window) >= limit:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Scan limit reached. Try again shortly.",
+        )
     window.append(now)
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
 
 
 @app.get("/health")
@@ -90,9 +115,16 @@ def health():
 
 
 @app.post("/installations", response_model=InstallationResponse)
-def create_installation():
+def create_installation(request: Request):
+    _enforce_rate_limit(
+        f"registration:{_client_ip(request)}",
+        REGISTRATION_RATE_LIMIT_PER_MINUTE,
+    )
     installation_id = str(uuid.uuid4())
-    return InstallationResponse(installation_id=installation_id, token=_sign_installation(installation_id))
+    return InstallationResponse(
+        installation_id=installation_id,
+        token=_sign_installation(installation_id),
+    )
 
 
 @app.post("/analyze", response_model=AnalysisResult)
@@ -101,8 +133,16 @@ def analyze(
     request: Request,
     installation_id: str = Depends(_verify_token),
 ):
-    client_key = f"{installation_id}:{request.client.host if request.client else 'unknown'}"
-    _enforce_rate_limit(client_key)
+    # Rate-limit both the installation and the source IP so minting fresh
+    # installation tokens cannot trivially bypass scan limits.
+    _enforce_rate_limit(
+        f"installation:{installation_id}",
+        RATE_LIMIT_PER_MINUTE,
+    )
+    _enforce_rate_limit(
+        f"ip:{_client_ip(request)}",
+        RATE_LIMIT_PER_MINUTE,
+    )
 
     try:
         return analyze_message(req.content.strip(), req.context.strip())
