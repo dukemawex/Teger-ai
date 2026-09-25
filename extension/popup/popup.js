@@ -4,6 +4,7 @@ const resultsEl = document.getElementById("results");
 const threatLevelEl = document.getElementById("threat-level");
 const confidenceEl = document.getElementById("confidence");
 const tacticsEl = document.getElementById("tactics");
+const signalsEl = document.getElementById("signals");
 const cuesEl = document.getElementById("cues");
 const reasoningEl = document.getElementById("reasoning");
 const recommendedActionEl = document.getElementById("recommended-action");
@@ -49,6 +50,17 @@ function renderResult(result) {
     tacticsEl.textContent = "No known manipulation tactic detected.";
   }
 
+  signalsEl.replaceChildren();
+  (result.signals || []).forEach((signal) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = titleCase(signal);
+    signalsEl.appendChild(chip);
+  });
+  if (!signalsEl.children.length) {
+    signalsEl.textContent = "No deterministic risk signal detected.";
+  }
+
   cuesEl.replaceChildren();
   (result.cues || []).forEach((cue) => {
     const item = document.createElement("li");
@@ -80,6 +92,7 @@ async function saveHistory(payload, result) {
     threatLevel: result.threat_level,
     confidence: result.confidence,
     tactics: result.tactics || [],
+    signals: result.signals || [],
     feedback: null,
   });
 
