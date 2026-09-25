@@ -8,18 +8,60 @@
   </head>
   <body>
     <main>
-      <h1>Teger AI</h1>
-      <p class="grant-badge">🏆 Supported by OpenAI Cybersecurity Grant</p>
-      <p id="status">No message captured yet.</p>
-      <button id="scan-btn">Analyze Captured Message</button>
+      <header class="brand-row">
+        <div>
+          <p class="eyebrow">TEGER AI</p>
+          <h1>Human-layer defense</h1>
+        </div>
+        <span class="status-dot" title="MVP v0.2"></span>
+      </header>
 
-      <section id="results" hidden>
-        <p><strong>Threat Level:</strong> <span id="threat-level">-</span></p>
-        <p><strong>Confidence:</strong> <span id="confidence">-</span></p>
-        <p><strong>Tactics:</strong> <span id="tactics">-</span></p>
-        <p><strong>Reasoning:</strong> <span id="reasoning">-</span></p>
-        <p><strong>Recommended Action:</strong> <span id="recommended-action">-</span></p>
+      <p class="grant-badge">Private beta · Explainable social-engineering detection</p>
+      <p id="status" class="status">Select a Gmail or Slack message with the in-page Teger button.</p>
+      <button id="scan-btn" disabled>Analyze captured message</button>
+
+      <section id="results" class="results" hidden>
+        <div class="risk-card">
+          <div>
+            <span class="label">Risk</span>
+            <strong id="threat-level">-</strong>
+          </div>
+          <div class="confidence-wrap">
+            <span class="label">Confidence</span>
+            <strong><span id="confidence">-</span>%</strong>
+          </div>
+        </div>
+
+        <div class="section">
+          <span class="label">Detected tactics</span>
+          <div id="tactics" class="chips"></div>
+        </div>
+
+        <div class="section">
+          <span class="label">Suspicious cues</span>
+          <ul id="cues" class="cue-list"></ul>
+        </div>
+
+        <div class="section">
+          <span class="label">Why Teger flagged it</span>
+          <p id="reasoning" class="copy">-</p>
+        </div>
+
+        <div class="action-box">
+          <span class="label">Recommended action</span>
+          <p id="recommended-action" class="copy">-</p>
+        </div>
+
+        <div class="feedback-row">
+          <button id="accurate-btn" class="secondary">Accurate</button>
+          <button id="false-positive-btn" class="secondary">False positive</button>
+        </div>
+        <p id="feedback-status" class="microcopy"></p>
       </section>
+
+      <p class="privacy-note">
+        Teger sends only the message you explicitly choose to scan. Scan history stored by the extension excludes raw message text.
+      </p>
     </main>
     <script src="popup.js"></script>
   </body>
