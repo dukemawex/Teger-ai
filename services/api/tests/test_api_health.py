@@ -46,5 +46,13 @@ def test_capabilities_are_honest(client):
     modules = {m["id"]: m["status"] for m in client.get("/v1/capabilities").json()["modules"]}
     assert modules["endpoint_protection"] == "planned"
     assert modules["device_inventory"] == "unavailable"
-    assert modules["ai_explanations"] == "unavailable"
+    assert modules["ai_explanations"] == "experimental"  # BYOK is allowed by default
     assert modules["url_reputation"] == "experimental"  # mock in tests
+
+
+def test_ai_capability_unavailable_without_server_key_or_byok(make_client):
+    from teger_ai_analyst import AnalystSettings, ClaudeAnalyst
+
+    client = make_client(analyst=ClaudeAnalyst(AnalystSettings(allow_byok=False)))
+    modules = {m["id"]: m["status"] for m in client.get("/v1/capabilities").json()["modules"]}
+    assert modules["ai_explanations"] == "unavailable"

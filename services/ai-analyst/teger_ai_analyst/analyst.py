@@ -1,12 +1,13 @@
 """Claude explanation adapter.
 
 Claude explains Teger's deterministic evidence; it never changes the verdict. Calls
-are made only when the feature is enabled, an API key is configured, the tenant is
-allowed, the request carries explicit consent, and the tenant has budget left.
+need explicit per-request consent plus either the user's own Anthropic key (BYOK) or
+Teger's server key (feature enabled, key configured, API key allowed, budget left).
 """
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -24,6 +25,12 @@ log = logging.getLogger("teger.ai_analyst")
 
 PROVIDER = "anthropic"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
+# Bring-your-own-key: Anthropic keys supplied per request by the user.
+BYOK_KEY_PATTERN = re.compile(r"sk-ant-[A-Za-z0-9_-]{20,250}")
+
+
+def is_valid_byok_key(value: str) -> bool:
+    return BYOK_KEY_PATTERN.fullmatch(value or "") is not None
 
 
 class _ModelKeyPoint(BaseModel):
@@ -56,17 +63,26 @@ class ClaudeAnalyst:
         client: Any | None = None,
         client_factory: Callable[[AnalystSettings], Any] | None = None,
         ledger: UsageLedger | None = None,
+        byok_client_factory: Callable[[AnalystSettings, str], Any] | None = None,
     ):
         self.settings = settings
         self._client = client
         self._client_factory = client_factory or (
             lambda s: anthropic.Anthropic(timeout=s.timeout_seconds, max_retries=s.max_retries)
         )
+        self._byok_client_factory = byok_client_factory or (
+            lambda s, key: anthropic.Anthropic(api_key=key, timeout=s.timeout_seconds, max_retries=s.max_retries)
+        )
         self.ledger = ledger or UsageLedger(settings.daily_token_budget_per_tenant)
 
     @property
     def available(self) -> bool:
+        """Whether Teger's own (server) Anthropic key can be used."""
         return self.settings.configured or (self.settings.enabled and self._client is not None)
+
+    @property
+    def byok_available(self) -> bool:
+        return self.settings.allow_byok
 
     def _get_client(self) -> Any:
         if self._client is None:
@@ -86,11 +102,33 @@ class ClaudeAnalyst:
         url: str | None = None,
         sender: str | None = None,
         subject: str | None = None,
+        api_key: str | None = None,
     ) -> AiExplanation:
-        if not self.available:
-            return _status(AiExplanationStatus.UNAVAILABLE, "Cloud AI analysis is not configured.")
-        if not self.ledger.has_budget(tenant_id):
-            return _status(AiExplanationStatus.UNAVAILABLE, "Daily AI analysis budget reached for this tenant.")
+        """Explain a verdict. ``api_key`` is the user's own Anthropic key (BYOK); it is used
+        for this call only and never stored or logged. Without it, Teger's server key is used."""
+        byok = api_key is not None
+        result = self._explain(
+            tenant_id=tenant_id, verdict=verdict, risk_score=risk_score, recommended_action=recommended_action,
+            policy_version=policy_version, evidence=evidence, content=content, url=url, sender=sender,
+            subject=subject, api_key=api_key,
+        )
+        return result.model_copy(update={"key_source": "byok" if byok else "server"})
+
+    def _explain(self, *, tenant_id: str, verdict: Verdict, risk_score: int, recommended_action: str,
+                 policy_version: str, evidence: list[Evidence], content: str, url: str | None,
+                 sender: str | None, subject: str | None, api_key: str | None) -> AiExplanation:
+        byok = api_key is not None
+        if byok:
+            if not self.byok_available:
+                return _status(AiExplanationStatus.NOT_PERMITTED, "Bring-your-own-key AI is disabled on this server.")
+            if not is_valid_byok_key(api_key):
+                return _status(AiExplanationStatus.FAILED, "The Anthropic API key format is invalid.")
+        else:
+            if not self.available:
+                return _status(AiExplanationStatus.UNAVAILABLE, "Cloud AI analysis is not configured.")
+            # Teger's daily budget protects Teger's key; BYOK spend is billed to the user's own account.
+            if not self.ledger.has_budget(tenant_id):
+                return _status(AiExplanationStatus.UNAVAILABLE, "Daily AI analysis budget reached for this tenant.")
 
         redacted_parts = [redact(part or "") for part in (content, url, sender, subject)]
         redactions = sum(r.total for r in redacted_parts)
@@ -114,8 +152,9 @@ class ClaudeAnalyst:
         if self.settings.refusal_fallback:
             kwargs.update(betas=[FALLBACK_BETA], fallbacks="default")
 
+        client = self._byok_client_factory(self.settings, api_key) if byok else self._get_client()
         try:
-            response = self._get_client().beta.messages.parse(**kwargs)
+            response = client.beta.messages.parse(**kwargs)
         except anthropic.RateLimitError:
             return _status(AiExplanationStatus.UNAVAILABLE, "AI provider rate limit reached.", redactions)
         except anthropic.APITimeoutError:
@@ -123,6 +162,8 @@ class ClaudeAnalyst:
         except anthropic.APIConnectionError:
             return _status(AiExplanationStatus.UNAVAILABLE, "AI provider could not be reached.", redactions)
         except (anthropic.AuthenticationError, anthropic.PermissionDeniedError):
+            if byok:
+                return _status(AiExplanationStatus.UNAVAILABLE, "Your Anthropic API key was rejected.", redactions)
             log.error("Anthropic credentials rejected")
             return _status(AiExplanationStatus.UNAVAILABLE, "AI provider is misconfigured.", redactions)
         except anthropic.BadRequestError:
@@ -132,8 +173,14 @@ class ClaudeAnalyst:
             return _status(AiExplanationStatus.UNAVAILABLE, "AI provider error.", redactions)
         except (ValidationError, ValueError):
             return _status(AiExplanationStatus.FAILED, "AI response did not match the required format.", redactions)
+        finally:
+            if byok:
+                # Do not keep clients (and the user's key) around between requests.
+                close = getattr(client, "close", None)
+                if callable(close):
+                    close()
 
-        usage = self._account(tenant_id, response)
+        usage = self._account(tenant_id, response, record_budget=not byok)
 
         if getattr(response, "stop_reason", None) == "refusal":
             return AiExplanation(status=AiExplanationStatus.DECLINED, provider=PROVIDER, usage=usage,
@@ -174,7 +221,7 @@ class ClaudeAnalyst:
             usage=usage,
         )
 
-    def _account(self, tenant_id: str, response: Any) -> AiUsage | None:
+    def _account(self, tenant_id: str, response: Any, record_budget: bool = True) -> AiUsage | None:
         raw = getattr(response, "usage", None)
         if raw is None:
             return None
@@ -185,7 +232,8 @@ class ClaudeAnalyst:
         # Bill against the model that actually served the request (fallbacks may differ).
         model = str(getattr(response, "model", None) or self.settings.model)
         cost = estimate_cost_usd(model, input_tokens, output_tokens, cache_read, cache_write)
-        self.ledger.record(tenant_id, input_tokens + output_tokens + cache_read + cache_write, cost)
+        if record_budget:
+            self.ledger.record(tenant_id, input_tokens + output_tokens + cache_read + cache_write, cost)
         return AiUsage(
             model=model, input_tokens=input_tokens, output_tokens=output_tokens,
             cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_write,

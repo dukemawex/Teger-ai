@@ -17,9 +17,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SCOPES = frozenset({"analyses:read", "analyses:write"})
-_KEY_ID = re.compile(r"^[a-z0-9]{12}$")
-_TENANT = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
-_TOKEN = re.compile(r"^tgr_([a-z0-9]{12})_([A-Za-z0-9_-]{32,128})$")
+_KEY_ID = re.compile(r"[a-z0-9]{12}")
+_TENANT = re.compile(r"[a-z0-9][a-z0-9-]{0,62}")
+_TOKEN = re.compile(r"tgr_([a-z0-9]{12})_([A-Za-z0-9_-]{32,128})")
 
 
 @dataclass(frozen=True)
@@ -44,7 +44,7 @@ class ApiKeyRecord:
         key_id, tenant = str(data["key_id"]), str(data["tenant_id"])
         scopes = frozenset(data.get("scopes", []))
         digest = str(data["secret_sha256"]).lower()
-        if not _KEY_ID.match(key_id) or not _TENANT.match(tenant):
+        if not _KEY_ID.fullmatch(key_id) or not _TENANT.fullmatch(tenant):
             raise ValueError("Invalid key_id or tenant_id in API key configuration.")
         if not scopes <= SCOPES:
             raise ValueError(f"Unknown scopes in API key configuration: {sorted(scopes - SCOPES)}")
@@ -80,7 +80,7 @@ class ApiKeyStore:
         return cls([ApiKeyRecord.from_dict(item) for item in json.loads(raw)])
 
     def authenticate(self, token: str) -> Principal | None:
-        match = _TOKEN.match(token or "")
+        match = _TOKEN.fullmatch(token or "")
         # Always hash so timing does not reveal whether the key_id exists.
         presented = _digest(match.group(2) if match else token or "")
         record = self._by_id.get(match.group(1)) if match else None

@@ -141,7 +141,7 @@ def _encode_host(raw_host: str) -> tuple[str, str | None]:
     if len(ascii_host) > 253:
         raise UrlValidationError("URL host is too long.")
     labels = ascii_host.split(".")
-    if not all(_LABEL.match(label) for label in labels):
+    if not all(_LABEL.fullmatch(label) for label in labels):
         raise UrlValidationError("URL host is not a valid domain name.")
     unicode_host = None
     if any(label.startswith("xn--") for label in labels):

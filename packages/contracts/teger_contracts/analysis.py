@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -153,6 +154,9 @@ class AiExplanation(_Strict):
     injection_attempt_observed: bool = False
     ungrounded_points_removed: int = 0
     redactions_applied: int = 0
+    key_source: Literal["server", "byok"] | None = Field(
+        default=None, description="Whose Anthropic key paid for the call: Teger's server key or the user's own (BYOK)."
+    )
     usage: AiUsage | None = None
     detail: str | None = Field(default=None, max_length=300)
 

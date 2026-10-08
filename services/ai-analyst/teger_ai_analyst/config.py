@@ -28,6 +28,7 @@ class AnalystSettings:
     refusal_fallback: bool = True
     max_content_chars: int = 12_000
     daily_token_budget_per_tenant: int = 200_000
+    allow_byok: bool = True
 
     @property
     def configured(self) -> bool:
@@ -50,4 +51,5 @@ class AnalystSettings:
             refusal_fallback=_bool(env.get("TEGER_AI_REFUSAL_FALLBACK"), default=True),
             max_content_chars=int(env.get("TEGER_AI_MAX_CONTENT_CHARS", "12000")),
             daily_token_budget_per_tenant=int(env.get("TEGER_AI_DAILY_TOKEN_BUDGET", "200000")),
+            allow_byok=_bool(env.get("TEGER_AI_ALLOW_BYOK"), default=True),
         )

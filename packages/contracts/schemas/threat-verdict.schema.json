@@ -29,6 +29,23 @@
           "title": "Key Points",
           "type": "array"
         },
+        "key_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "server",
+                "byok"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whose Anthropic key paid for the call: Teger's server key or the user's own (BYOK).",
+          "title": "Key Source"
+        },
         "provider": {
           "anyOf": [
             {

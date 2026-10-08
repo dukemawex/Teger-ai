@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from teger_ai_analyst import AnalystSettings, ClaudeAnalyst
+from teger_ai_analyst import AnalystSettings, ClaudeAnalyst, is_valid_byok_key
 from teger_contracts import (
     AiExplanation,
     AiExplanationStatus,
@@ -34,7 +34,7 @@ from .settings import ApiSettings
 from .store import AnalysisStore
 
 API_VERSION = "1.0.0-experimental"
-_REQUEST_ID = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+_REQUEST_ID = re.compile(r"[A-Za-z0-9-]{8,64}")
 _DOC_PATHS = ("/docs", "/redoc", "/openapi.json")
 
 
@@ -152,14 +152,14 @@ def create_app(
             CORSMiddleware,
             allow_origins=list(settings.cors_origins),
             allow_methods=["GET", "POST"],
-            allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+            allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Anthropic-Api-Key"],
             allow_credentials=False,
         )
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):
         incoming = request.headers.get("x-request-id", "")
-        request.state.request_id = incoming if _REQUEST_ID.match(incoming) else uuid.uuid4().hex
+        request.state.request_id = incoming if _REQUEST_ID.fullmatch(incoming) else uuid.uuid4().hex
         response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -244,6 +244,7 @@ def create_app(
             "api_keys": "configured" if len(keys) else "missing",
             "reputation_provider": settings.reputation_provider,
             "ai_analyst": "configured" if analyst.available else "disabled",
+            "ai_byok": "allowed" if analyst.byok_available else "disabled",
             "storage": "in_memory",
             "rate_limiter": "in_memory",
         }
@@ -253,7 +254,7 @@ def create_app(
 
     @app.get("/v1/capabilities", tags=["meta"])
     def get_capabilities():
-        return capabilities(settings.reputation_provider, analyst.available)
+        return capabilities(settings.reputation_provider, analyst.available, analyst.byok_available)
 
     @app.get("/v1/whoami", tags=["meta"])
     def whoami(principal: Annotated[Principal, Depends(authenticate)]):
@@ -276,7 +277,15 @@ def create_app(
         body: AnalysisRequest,
         request: Request,
         principal: Annotated[Principal, Depends(require("analyses:write"))],
+        anthropic_key: Annotated[str | None, Header(
+            alias="X-Anthropic-Api-Key",
+            description="Optional: your own Anthropic API key (BYOK) for the AI explanation. "
+                        "Used for this request only; never stored or logged.",
+        )] = None,
     ) -> ThreatVerdict:
+        byok_key = (anthropic_key or "").strip() or None
+        if byok_key is not None and not is_valid_byok_key(byok_key):
+            raise HTTPException(400, "The X-Anthropic-Api-Key header is not a valid Anthropic API key.")
         try:
             result = engine.analyze(url=body.url, content=body.content, content_type=body.content_type,
                                     sender=body.sender, subject=body.subject)
@@ -289,12 +298,16 @@ def create_app(
         elif not body.cloud_ai_consent:
             explanation = AiExplanation(status=AiExplanationStatus.CONSENT_REQUIRED,
                                         detail="Set cloud_ai_consent=true to send redacted content to the AI provider.")
-        elif not principal.cloud_ai_allowed:
-            explanation = AiExplanation(status=AiExplanationStatus.NOT_PERMITTED,
-                                        detail="Cloud AI analysis is not enabled for this API key.")
-        elif not analyst.available:
-            explanation = AiExplanation(status=AiExplanationStatus.UNAVAILABLE,
-                                        detail="Cloud AI analysis is not configured.")
+        elif byok_key is None and not principal.cloud_ai_allowed:
+            explanation = AiExplanation(
+                status=AiExplanationStatus.NOT_PERMITTED,
+                detail="Teger's AI key is not enabled for this API key. Supply your own Anthropic key (BYOK).",
+            )
+        elif byok_key is None and not analyst.available:
+            explanation = AiExplanation(
+                status=AiExplanationStatus.UNAVAILABLE,
+                detail="Teger's AI key is not configured on this server. Supply your own Anthropic key (BYOK).",
+            )
         else:
             explanation = analyst.explain(
                 tenant_id=principal.tenant_id, verdict=decision.verdict, risk_score=decision.risk_score,
@@ -302,6 +315,7 @@ def create_app(
                 evidence=result.evidence, content=result.subject.content,
                 url=result.url.normalized if result.url else None,
                 sender=result.subject.sender or None, subject=result.subject.subject or None,
+                api_key=byok_key,
             )
 
         verdict = ThreatVerdict(
@@ -328,6 +342,7 @@ def create_app(
             verdict=verdict.verdict.value, risk_score=verdict.risk_score, evidence_count=len(verdict.evidence),
             url_host=verdict.url.host if verdict.url else None, mock_intelligence=verdict.mock_intelligence_used,
             ai_status=explanation.status.value,
+            ai_key_source=explanation.key_source,
             ai_tokens=(explanation.usage.input_tokens + explanation.usage.output_tokens) if explanation.usage else 0,
         )
         return verdict

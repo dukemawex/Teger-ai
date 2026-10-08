@@ -68,3 +68,12 @@ def test_keygen_cli(capsys):
     assert keygen_main(["--tenant", "acme", "--scopes", "analyses:read"]) == 0
     out = capsys.readouterr().out
     assert "tgr_" in out and '"tenant_id": "acme"' in out
+
+
+def test_trailing_newline_variants_rejected():
+    token, record = generate_key("t", ["analyses:read"])
+    store = ApiKeyStore.from_config(json.dumps([record]))
+    assert store.authenticate(token) is not None
+    assert store.authenticate(token + "\n") is None
+    with pytest.raises(ValueError):
+        ApiKeyStore.from_config(json.dumps([{**record, "tenant_id": "t\n"}]))

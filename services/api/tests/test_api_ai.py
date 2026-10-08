@@ -72,3 +72,84 @@ def test_ai_usage_recorded_in_audit_events(ai_client, keys):
     events = ai_client.get("/v1/events", headers=keys.header("alice_ai")).json()
     created = next(e for e in events if e["event"] == "analysis.created")
     assert created["details"]["ai_status"] == "completed" and created["details"]["ai_tokens"] == 1200
+
+
+# ----------------------------------------------------------------- bring your own key
+
+BYOK = "sk-ant-api03-" + "k" * 40
+
+
+def byok_client(make_client, fake_anthropic_cls, allow_byok=True):
+    from teger_ai_analyst import AnalystSettings, ClaudeAnalyst, ModelExplanation
+
+    seen = []
+    parsed = ModelExplanation.model_validate({
+        "summary": "s", "key_points": [{"evidence_ids": ["ev-1"], "explanation": "e"}],
+        "user_guidance": "g", "injection_attempt_observed": False,
+    })
+
+    def factory(settings, key):
+        seen.append(key)
+        return fake_anthropic_cls(parsed)
+
+    analyst = ClaudeAnalyst(AnalystSettings(allow_byok=allow_byok), byok_client_factory=factory)
+    return make_client(analyst=analyst), seen
+
+
+def byok_post(client, keys, who="alice", key=BYOK, **extra):
+    return client.post("/v1/analyses", json={**PHISH, **extra},
+                       headers={**keys.header(who), "X-Anthropic-Api-Key": key})
+
+
+def test_byok_works_for_keys_without_server_ai_permission(make_client, keys, fake_anthropic_cls):
+    client, seen = byok_client(make_client, fake_anthropic_cls)
+    body = byok_post(client, keys, explain=True, cloud_ai_consent=True).json()
+    assert body["explanation"]["status"] == "completed"
+    assert body["explanation"]["key_source"] == "byok"
+    assert seen == [BYOK]
+
+
+def test_byok_still_requires_consent(make_client, keys, fake_anthropic_cls):
+    client, seen = byok_client(make_client, fake_anthropic_cls)
+    assert byok_post(client, keys, explain=True).json()["explanation"]["status"] == "consent_required"
+    assert seen == []
+
+
+def test_byok_not_used_unless_explanation_requested(make_client, keys, fake_anthropic_cls):
+    client, seen = byok_client(make_client, fake_anthropic_cls)
+    assert byok_post(client, keys).json()["explanation"]["status"] == "not_requested"
+    assert seen == []
+
+
+def test_invalid_byok_header_rejected_without_echo(make_client, keys, fake_anthropic_cls):
+    client, seen = byok_client(make_client, fake_anthropic_cls)
+    bad = "sk-ant-not valid key"
+    r = byok_post(client, keys, key=bad, explain=True, cloud_ai_consent=True)
+    assert r.status_code == 400 and bad not in r.text and seen == []
+
+
+def test_byok_disabled_by_operator(make_client, keys, fake_anthropic_cls):
+    client, seen = byok_client(make_client, fake_anthropic_cls, allow_byok=False)
+    body = byok_post(client, keys, explain=True, cloud_ai_consent=True).json()
+    assert body["explanation"]["status"] == "not_permitted" and seen == []
+
+
+def test_byok_key_never_in_response_logs_or_events(make_client, keys, fake_anthropic_cls, caplog):
+    import logging
+
+    client, _ = byok_client(make_client, fake_anthropic_cls)
+    with caplog.at_level(logging.DEBUG):
+        logging.getLogger("teger.audit").propagate = True
+        r = byok_post(client, keys, explain=True, cloud_ai_consent=True)
+    assert BYOK not in r.text
+    assert all(BYOK not in rec.getMessage() for rec in caplog.records)
+    events = client.get("/v1/events", headers=keys.header("alice")).json()
+    assert BYOK not in str(events)
+    created = next(e for e in events if e["event"] == "analysis.created")
+    assert created["details"]["ai_key_source"] == "byok"
+
+
+def test_without_byok_unpermitted_key_is_told_about_byok(client, keys):
+    body = post(client, keys, who="alice", explain=True, cloud_ai_consent=True)
+    assert body["explanation"]["status"] == "not_permitted"
+    assert "BYOK" in body["explanation"]["detail"]
