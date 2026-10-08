@@ -1,0 +1,144 @@
+{
+  "$defs": {
+    "AndroidEventType": {
+      "enum": [
+        "url_check",
+        "app_installed",
+        "sms_link",
+        "notification_link",
+        "device_posture"
+      ],
+      "title": "AndroidEventType",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "app_version": {
+      "maxLength": 32,
+      "title": "App Version",
+      "type": "string"
+    },
+    "device_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Device Id",
+      "type": "string"
+    },
+    "event_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "$ref": "#/$defs/AndroidEventType"
+    },
+    "is_rooted": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Is Rooted"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "os_patch_level": {
+      "anyOf": [
+        {
+          "maxLength": 10,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Os Patch Level"
+    },
+    "package_name": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Package Name"
+    },
+    "package_signing_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Package Signing Sha256"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity",
+      "default": "info"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "url": {
+      "anyOf": [
+        {
+          "maxLength": 2048,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Url"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "event_id",
+    "device_id",
+    "app_version",
+    "observed_at",
+    "event_type"
+  ],
+  "title": "AndroidSecurityEvent",
+  "type": "object"
+}

@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "QuarantineAction": {
+      "enum": [
+        "quarantine",
+        "restore"
+      ],
+      "title": "QuarantineAction",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/QuarantineAction"
+    },
+    "command_id": {
+      "title": "Command Id",
+      "type": "string"
+    },
+    "completed_at": {
+      "format": "date-time",
+      "title": "Completed At",
+      "type": "string"
+    },
+    "detail": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Detail"
+    },
+    "device_id": {
+      "title": "Device Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "rejected_signature",
+        "expired",
+        "not_found",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "command_id",
+    "device_id",
+    "action",
+    "status",
+    "completed_at"
+  ],
+  "title": "QuarantineResult",
+  "type": "object"
+}

@@ -1,0 +1,187 @@
+{
+  "$defs": {
+    "AuthenticationResult": {
+      "enum": [
+        "pass",
+        "fail",
+        "softfail",
+        "neutral",
+        "none",
+        "unknown"
+      ],
+      "title": "AuthenticationResult",
+      "type": "string"
+    },
+    "EmailAttachmentRef": {
+      "additionalProperties": false,
+      "properties": {
+        "file_name": {
+          "maxLength": 255,
+          "title": "File Name",
+          "type": "string"
+        },
+        "mime_type": {
+          "anyOf": [
+            {
+              "maxLength": 127,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mime Type"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file_name",
+        "size_bytes",
+        "sha256"
+      ],
+      "title": "EmailAttachmentRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attachments": {
+      "items": {
+        "$ref": "#/$defs/EmailAttachmentRef"
+      },
+      "maxItems": 50,
+      "title": "Attachments",
+      "type": "array"
+    },
+    "dkim": {
+      "$ref": "#/$defs/AuthenticationResult",
+      "default": "unknown"
+    },
+    "dmarc": {
+      "$ref": "#/$defs/AuthenticationResult",
+      "default": "unknown"
+    },
+    "from_address": {
+      "maxLength": 320,
+      "title": "From Address",
+      "type": "string"
+    },
+    "from_display_name": {
+      "anyOf": [
+        {
+          "maxLength": 256,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "From Display Name"
+    },
+    "message_id": {
+      "maxLength": 998,
+      "title": "Message Id",
+      "type": "string"
+    },
+    "received_at": {
+      "format": "date-time",
+      "title": "Received At",
+      "type": "string"
+    },
+    "reply_to": {
+      "anyOf": [
+        {
+          "maxLength": 320,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reply To"
+    },
+    "return_path": {
+      "anyOf": [
+        {
+          "maxLength": 320,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Return Path"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "spf": {
+      "$ref": "#/$defs/AuthenticationResult",
+      "default": "unknown"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 998,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subject"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "text_body": {
+      "anyOf": [
+        {
+          "maxLength": 20000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text Body"
+    },
+    "urls": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "title": "Urls",
+      "type": "array"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "message_id",
+    "from_address",
+    "received_at"
+  ],
+  "title": "EmailMessageAnalysisRequest",
+  "type": "object"
+}

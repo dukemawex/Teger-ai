@@ -8,3 +8,8 @@ extension/dist/
 *.pyc
 .DS_Store
 dataset/export.json
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.next/
+ml/evaluation/reports/

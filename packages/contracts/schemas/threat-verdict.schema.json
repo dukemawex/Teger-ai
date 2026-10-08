@@ -1,0 +1,543 @@
+{
+  "$defs": {
+    "AiExplanation": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "injection_attempt_observed": {
+          "default": false,
+          "title": "Injection Attempt Observed",
+          "type": "boolean"
+        },
+        "key_points": {
+          "items": {
+            "$ref": "#/$defs/AiKeyPoint"
+          },
+          "maxItems": 12,
+          "title": "Key Points",
+          "type": "array"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "redactions_applied": {
+          "default": 0,
+          "title": "Redactions Applied",
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/$defs/AiExplanationStatus"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "maxLength": 1200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        },
+        "ungrounded_points_removed": {
+          "default": 0,
+          "title": "Ungrounded Points Removed",
+          "type": "integer"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AiUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "user_guidance": {
+          "anyOf": [
+            {
+              "maxLength": 800,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Guidance"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "AiExplanation",
+      "type": "object"
+    },
+    "AiExplanationStatus": {
+      "enum": [
+        "not_requested",
+        "consent_required",
+        "not_permitted",
+        "unavailable",
+        "declined",
+        "failed",
+        "completed"
+      ],
+      "title": "AiExplanationStatus",
+      "type": "string"
+    },
+    "AiKeyPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "explanation": {
+          "maxLength": 600,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_ids",
+        "explanation"
+      ],
+      "title": "AiKeyPoint",
+      "type": "object"
+    },
+    "AiUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_creation_input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cache Creation Input Tokens",
+          "type": "integer"
+        },
+        "cache_read_input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cache Read Input Tokens",
+          "type": "integer"
+        },
+        "estimated_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Cost Usd"
+        },
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "AiUsage",
+      "type": "object"
+    },
+    "ContentType": {
+      "enum": [
+        "email",
+        "chat",
+        "sms",
+        "web",
+        "other"
+      ],
+      "title": "ContentType",
+      "type": "string"
+    },
+    "DetectorReport": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "provider_mode": {
+          "$ref": "#/$defs/ProviderMode"
+        },
+        "required": {
+          "description": "Whether a 'no threat' verdict requires this detector to succeed.",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/DetectorStatus"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "status",
+        "provider_mode",
+        "required"
+      ],
+      "title": "DetectorReport",
+      "type": "object"
+    },
+    "DetectorStatus": {
+      "enum": [
+        "ok",
+        "unavailable",
+        "error",
+        "skipped"
+      ],
+      "title": "DetectorStatus",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "Machine-readable indicator name, e.g. 'brand_lookalike_domain'.",
+          "title": "Category",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "detector": {
+          "title": "Detector",
+          "type": "string"
+        },
+        "id": {
+          "description": "Stable within one analysis, e.g. 'ev-3'.",
+          "title": "Id",
+          "type": "string"
+        },
+        "indicator": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Redacted excerpt or value that triggered the rule.",
+          "title": "Indicator"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "tactic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Taxonomy slug from dataset/taxonomy.py, if any.",
+          "title": "Tactic"
+        },
+        "weight": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "detector",
+        "category",
+        "severity",
+        "weight",
+        "description"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "IntelligenceCoverage": {
+      "enum": [
+        "complete",
+        "partial"
+      ],
+      "title": "IntelligenceCoverage",
+      "type": "string"
+    },
+    "NormalizedUrl": {
+      "additionalProperties": false,
+      "properties": {
+        "had_userinfo": {
+          "title": "Had Userinfo",
+          "type": "boolean"
+        },
+        "host": {
+          "description": "ASCII (IDNA) host.",
+          "title": "Host",
+          "type": "string"
+        },
+        "is_ip_literal": {
+          "title": "Is Ip Literal",
+          "type": "boolean"
+        },
+        "normalized": {
+          "title": "Normalized",
+          "type": "string"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        },
+        "registrable_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Registrable Domain"
+        },
+        "scheme": {
+          "title": "Scheme",
+          "type": "string"
+        },
+        "unicode_host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unicode Host"
+        }
+      },
+      "required": [
+        "normalized",
+        "scheme",
+        "host",
+        "is_ip_literal",
+        "had_userinfo"
+      ],
+      "title": "NormalizedUrl",
+      "type": "object"
+    },
+    "ProviderMode": {
+      "enum": [
+        "local",
+        "live",
+        "mock",
+        "none"
+      ],
+      "title": "ProviderMode",
+      "type": "string"
+    },
+    "RecommendedAction": {
+      "enum": [
+        "block",
+        "warn",
+        "caution",
+        "allow"
+      ],
+      "title": "RecommendedAction",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Verdict": {
+      "enum": [
+        "malicious",
+        "suspicious",
+        "no_threat_detected",
+        "unknown"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "confidence": {
+      "description": "Rule-based agreement score. Not a calibrated probability.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "content_type": {
+      "$ref": "#/$defs/ContentType"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "detection_sources": {
+      "items": {
+        "$ref": "#/$defs/DetectorReport"
+      },
+      "title": "Detection Sources",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "explanation": {
+      "$ref": "#/$defs/AiExplanation"
+    },
+    "intelligence_coverage": {
+      "$ref": "#/$defs/IntelligenceCoverage"
+    },
+    "mock_intelligence_used": {
+      "title": "Mock Intelligence Used",
+      "type": "boolean"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "recommended_action": {
+      "$ref": "#/$defs/RecommendedAction"
+    },
+    "recommended_action_text": {
+      "title": "Recommended Action Text",
+      "type": "string"
+    },
+    "risk_score": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Risk Score",
+      "type": "integer"
+    },
+    "url": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NormalizedUrl"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "verdict": {
+      "$ref": "#/$defs/Verdict"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "created_at",
+    "verdict",
+    "risk_score",
+    "confidence",
+    "recommended_action",
+    "recommended_action_text",
+    "evidence",
+    "detection_sources",
+    "intelligence_coverage",
+    "mock_intelligence_used",
+    "policy_version",
+    "content_type",
+    "explanation"
+  ],
+  "title": "ThreatVerdict",
+  "type": "object"
+}

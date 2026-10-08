@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "QuarantineAction": {
+      "enum": [
+        "quarantine",
+        "restore"
+      ],
+      "title": "QuarantineAction",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Command to an endpoint agent. Agents MUST verify the signature against a pinned\ntenant policy key and MUST refuse unsigned or expired commands. Destructive\ndeletion is intentionally not representable in this contract.",
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/QuarantineAction"
+    },
+    "approved_at": {
+      "format": "date-time",
+      "title": "Approved At",
+      "type": "string"
+    },
+    "command_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Command Id",
+      "type": "string"
+    },
+    "device_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Device Id",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "file_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "File Sha256",
+      "type": "string"
+    },
+    "original_path": {
+      "maxLength": 1024,
+      "title": "Original Path",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "title": "Reason",
+      "type": "string"
+    },
+    "requested_by": {
+      "description": "Human approver identity.",
+      "maxLength": 128,
+      "title": "Requested By",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "signature": {
+      "description": "Detached signature over the canonical JSON.",
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Signature",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "command_id",
+    "device_id",
+    "action",
+    "file_sha256",
+    "original_path",
+    "reason",
+    "requested_by",
+    "approved_at",
+    "expires_at",
+    "signature"
+  ],
+  "title": "QuarantineRequest",
+  "type": "object"
+}

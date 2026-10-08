@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "RecommendedAction": {
+      "enum": [
+        "block",
+        "warn",
+        "caution",
+        "allow"
+      ],
+      "title": "RecommendedAction",
+      "type": "string"
+    },
+    "Verdict": {
+      "enum": [
+        "malicious",
+        "suspicious",
+        "no_threat_detected",
+        "unknown"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "engines": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Engines",
+      "type": "array"
+    },
+    "matched_signatures": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Matched Signatures",
+      "type": "array"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "recommended_action": {
+      "$ref": "#/$defs/RecommendedAction"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/Verdict"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "request_id",
+    "sha256",
+    "verdict",
+    "recommended_action",
+    "policy_version"
+  ],
+  "title": "FileScanResult",
+  "type": "object"
+}

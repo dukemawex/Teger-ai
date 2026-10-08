@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "ContentType": {
+      "enum": [
+        "email",
+        "chat",
+        "sms",
+        "web",
+        "other"
+      ],
+      "title": "ContentType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cloud_ai_consent": {
+      "default": false,
+      "description": "Explicit consent to send redacted content to the configured cloud AI provider.",
+      "title": "Cloud Ai Consent",
+      "type": "boolean"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "maxLength": 20000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Content"
+    },
+    "content_type": {
+      "$ref": "#/$defs/ContentType",
+      "default": "other"
+    },
+    "explain": {
+      "default": false,
+      "description": "Request an AI explanation of the evidence.",
+      "title": "Explain",
+      "type": "boolean"
+    },
+    "sender": {
+      "anyOf": [
+        {
+          "maxLength": 320,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sender"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 998,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subject"
+    },
+    "url": {
+      "anyOf": [
+        {
+          "maxLength": 2048,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Url"
+    }
+  },
+  "title": "AnalysisRequest",
+  "type": "object"
+}
