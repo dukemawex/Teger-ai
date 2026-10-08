@@ -119,3 +119,23 @@ jobs:
       - run: pip install -r requirements-platform.txt pip-audit
       - run: pip-audit -r backend/requirements.txt
       - run: pip-audit --skip-editable
+
+  web-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

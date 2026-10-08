@@ -13,3 +13,4 @@ dataset/export.json
 .ruff_cache/
 .next/
 ml/evaluation/reports/
+*.tsbuildinfo
