@@ -3,6 +3,6 @@
 -e packages/security-core
 -e services/ai-analyst
 -e services/api
-pytest>=8,<9
+pytest>=9.0.3,<10
 httpx>=0.27,<1
 flake8>=7,<8
