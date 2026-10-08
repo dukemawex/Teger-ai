@@ -1,9 +1,9 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, byokStatus } from "@/lib/api";
 import type { WhoAmI } from "@/lib/types";
 import { AnalyzeForm } from "./AnalyzeForm";
 
 export default async function AnalyzePage() {
-  const me = await apiFetch<WhoAmI>("/v1/whoami");
+  const [me, byok] = await Promise.all([apiFetch<WhoAmI>("/v1/whoami"), byokStatus()]);
   return (
     <>
       <header className="page-head">
@@ -14,7 +14,7 @@ export default async function AnalyzePage() {
           versioned policy.
         </p>
       </header>
-      <AnalyzeForm cloudAiAllowed={me.cloud_ai_allowed} />
+      <AnalyzeForm cloudAiAllowed={me.cloud_ai_allowed} byokHint={byok.hint} />
     </>
   );
 }

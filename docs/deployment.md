@@ -34,7 +34,8 @@ Run with `uvicorn teger_api.main:app --host 0.0.0.0 --port $PORT --workers 1`.
 | `TEGER_REPUTATION_PROVIDER` | `none` until a live provider is integrated |
 | `TEGER_TRUST_PROXY_HEADERS` | `true` **only** behind a proxy that overwrites `X-Forwarded-For` |
 | `TEGER_CORS_ORIGINS` | empty (the console calls the API server-side) |
-| `TEGER_AI_ENABLED` / `ANTHROPIC_API_KEY` | leave disabled until the AI-provider policy is decided |
+| `TEGER_AI_ALLOW_BYOK` | `true` (default): users bring their own Anthropic key |
+| `TEGER_AI_ENABLED` / `ANTHROPIC_API_KEY` | leave unset unless Teger decides to pay for AI with its own key |
 
 Constraints until the P0 backlog items land: run **one** worker/instance (in-memory
 state), expect history loss on restart, and keep the API behind TLS.
@@ -63,4 +64,4 @@ blueprint remains `backend/render.yaml`.
 
 - Changing DNS for `tegerai.tech` or the Render service.
 - Pointing the published extension at the v1 API.
-- Enabling cloud AI explanations in any shared environment.
+- Enabling a Teger-owned Anthropic key in any shared environment (BYOK needs no Teger key).

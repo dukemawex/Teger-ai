@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiBase } from "@/lib/api";
 import { isSameOrigin } from "@/lib/csrf";
-import { API_KEY_PATTERN, SESSION_COOKIE, SESSION_TTL_SECONDS, sealSession } from "@/lib/session";
+import { AI_KEY_COOKIE, API_KEY_PATTERN, SESSION_COOKIE, SESSION_TTL_SECONDS, sealSession } from "@/lib/session";
 
 const cookieOptions = {
   httpOnly: true,
@@ -52,5 +52,6 @@ export async function DELETE(request: Request) {
   }
   const result = NextResponse.json({ connected: false });
   result.cookies.set(SESSION_COOKIE, "", { ...cookieOptions, maxAge: 0 });
+  result.cookies.set(AI_KEY_COOKIE, "", { ...cookieOptions, maxAge: 0 });
   return result;
 }

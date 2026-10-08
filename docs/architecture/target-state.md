@@ -91,15 +91,16 @@ tenant-scoped store  →  audit log (no content)  →  response
 | Rate-limit windows | in-memory | Redis |
 | Audit log | JSON to stdout | append-only sink (e.g. SIEM) |
 
-## 6. Open governance decision — AI provider policy
+## 6. AI provider policy — decided: bring your own key
 
-`CONTRIBUTING.md` currently states that all AI inference must go through OpenAI only,
-and the project is supported by the OpenAI Cybersecurity Grant. The Claude adapter in
-`services/ai-analyst` was added at the explicit request of the platform brief. To keep
-both positions honest until the owner decides:
+The owner decided that users can bring their own Anthropic key (BYOK).
+`CONTRIBUTING.md` was updated accordingly:
 
 - the legacy production path (`backend/`, OpenAI) is unchanged;
-- the Claude adapter is **disabled unless** `TEGER_AI_ENABLED=true` and
-  `ANTHROPIC_API_KEY` are set, and the tenant is allow-listed;
-- `CONTRIBUTING.md` was **not** edited. The owner should either update the policy or
-  remove `services/ai-analyst`, and should check the grant terms.
+- Claude explanations run on the **user's** Anthropic key, sent per request as
+  `X-Anthropic-Api-Key` (the console keeps it in an encrypted HttpOnly cookie). Teger
+  never stores or logs it, and BYOK usage is billed to the user's Anthropic account;
+- per-request consent (`cloud_ai_consent`) is still required; operators can turn BYOK
+  off with `TEGER_AI_ALLOW_BYOK=false`;
+- a Teger-owned key path still exists but stays disabled unless `TEGER_AI_ENABLED=true`,
+  `ANTHROPIC_API_KEY` is set, and the API key has `cloud_ai_allowed`.

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiBase, currentApiKey } from "@/lib/api";
+import { apiBase, currentApiKey, currentByokKey } from "@/lib/api";
 import { isSameOrigin } from "@/lib/csrf";
 
 const MAX_BODY = 64 * 1024;
@@ -14,11 +14,22 @@ export async function POST(request: Request) {
   const raw = await request.text();
   if (raw.length > MAX_BODY) return NextResponse.json({ detail: "Request too large." }, { status: 413 });
 
+  const headers: Record<string, string> = { Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
+  let wantsExplanation = false;
+  try {
+    const parsed = JSON.parse(raw);
+    wantsExplanation = parsed?.explain === true && parsed?.cloud_ai_consent === true;
+  } catch {
+    // The API returns the validation error.
+  }
+  const byok = wantsExplanation ? await currentByokKey() : null;
+  if (byok) headers["X-Anthropic-Api-Key"] = byok; // sent only with consented explanation requests
+
   let upstream: Response;
   try {
     upstream = await fetch(`${apiBase()}/v1/analyses`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers,
       body: raw,
       cache: "no-store",
     });

@@ -6,7 +6,8 @@ import type { ThreatVerdict } from "@/lib/types";
 
 const CONTENT_TYPES = ["email", "chat", "sms", "web", "other"] as const;
 
-export function AnalyzeForm({ cloudAiAllowed }: { cloudAiAllowed: boolean }) {
+export function AnalyzeForm({ cloudAiAllowed, byokHint }: { cloudAiAllowed: boolean; byokHint: string | null }) {
+  const aiPossible = cloudAiAllowed || Boolean(byokHint);
   const [url, setUrl] = useState("");
   const [content, setContent] = useState("");
   const [sender, setSender] = useState("");
@@ -86,13 +87,13 @@ export function AnalyzeForm({ cloudAiAllowed }: { cloudAiAllowed: boolean }) {
         <textarea id="content" rows={10} value={content} onChange={(e) => setContent(e.target.value)}
           maxLength={20000} placeholder="Paste only the message you want Teger to analyze." />
 
-        <label className={`check ${cloudAiAllowed ? "" : "disabled"}`}>
-          <input type="checkbox" checked={explain} disabled={!cloudAiAllowed}
+        <label className={`check ${aiPossible ? "" : "disabled"}`}>
+          <input type="checkbox" checked={explain} disabled={!aiPossible}
             onChange={(e) => setExplain(e.target.checked)} />
           <span>
-            Explain with Teger Intelligence. I consent to sending a <b>redacted</b> copy of this content to the
-            configured cloud AI provider (Anthropic Claude).
-            {!cloudAiAllowed && " Not enabled for this API key."}
+            Explain with Teger Intelligence. I consent to sending a <b>redacted</b> copy of this content to Anthropic
+            Claude{byokHint ? <> using <b>my own key</b> (<code>{byokHint}</code>)</> : " using Teger's key"}.
+            {!aiPossible && <> Add your own Anthropic key in <a href="/settings">Settings</a> to enable this.</>}
           </span>
         </label>
 

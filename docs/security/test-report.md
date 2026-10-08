@@ -95,3 +95,19 @@ Benign URL-only samples are `unknown` because no live reputation provider exists
 - Browser extension (M2), Windows/Android agents (planned, contracts only).
 - Formal OWASP ASVS 5.0 verification. The threat model maps controls to ASVS chapters
   as a reference only; no conformance level is claimed.
+
+## 7. Addendum — bring-your-own-key (BYOK)
+
+| Check | Result |
+|---|---|
+| `pytest services packages ml/evaluation backend dataset` | 264 passed (incl. 14 new BYOK and newline-validation tests) |
+| `npm test` (apps/web) | 13 passed |
+| Browser run, tenant **without** Teger-AI permission | AI checkbox disabled until a key is saved; non-Anthropic key rejected; saved key shown only as `sk-ant-…XXXX`; cookie `HttpOnly`, `SameSite=Strict`, value does not contain the key |
+| Real Anthropic call with a fake key | Request reached api.anthropic.com and was rejected; UI shows "Your Anthropic API key was rejected."; verdict unchanged |
+| Key leakage | key absent from API log, web log, page HTML, responses and `/v1/events`; audit shows `ai_key_source: byok` |
+| Remove key | cookie cleared |
+
+Finding F7: anchored validators used `re.match` with `$`, which also accepts a trailing
+newline (e.g. `key + "\n"`). Switched to `fullmatch` for API keys, tenant IDs, request
+IDs, BYOK keys and host labels; regression tests added. Low severity: HTTP headers
+cannot normally carry raw newlines.

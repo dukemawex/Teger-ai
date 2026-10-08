@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { openSession, SESSION_COOKIE } from "./session";
+import { AI_KEY_COOKIE, keyHint, openSession, SESSION_COOKIE } from "./session";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -18,6 +18,17 @@ export function apiBase(): string {
 export async function currentApiKey(): Promise<string | null> {
   const store = await cookies();
   return openSession(store.get(SESSION_COOKIE)?.value);
+}
+
+/** The user's own Anthropic key (BYOK), if they saved one. Server-side only. */
+export async function currentByokKey(): Promise<string | null> {
+  const store = await cookies();
+  return openSession(store.get(AI_KEY_COOKIE)?.value);
+}
+
+export async function byokStatus(): Promise<{ configured: boolean; hint: string | null }> {
+  const key = await currentByokKey();
+  return { configured: Boolean(key), hint: key ? keyHint(key) : null };
 }
 
 /** Server-side call to the Teger API with the session's key. Redirects to /connect when unauthenticated. */

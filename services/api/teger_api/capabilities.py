@@ -13,6 +13,7 @@ def capabilities(reputation_provider: str, ai_available: bool, byok_allowed: boo
         "mock": ("experimental", "MOCK fixture provider: offline test data, not live intelligence."),
     }[reputation_provider]
     return {
+        "ai": {"server_key": ai_available, "byok_allowed": byok_allowed},
         "modules": [
             {"id": "threat_analysis_api", "name": "Threat analysis API (v1)", "status": "experimental",
              "detail": "Deterministic URL and message analysis. Not yet deployed to production."},

@@ -1,9 +1,15 @@
-import { apiFetch, apiBase } from "@/lib/api";
-import type { WhoAmI } from "@/lib/types";
+import { apiFetch, apiBase, byokStatus } from "@/lib/api";
+import type { CapabilityModule, WhoAmI } from "@/lib/types";
+import { ByokForm } from "./ByokForm";
 import { DisconnectButton } from "./DisconnectButton";
 
 export default async function SettingsPage() {
-  const me = await apiFetch<WhoAmI>("/v1/whoami");
+  const [me, caps, byok] = await Promise.all([
+    apiFetch<WhoAmI>("/v1/whoami"),
+    apiFetch<{ ai?: { byok_allowed: boolean }; modules: CapabilityModule[] }>("/v1/capabilities"),
+    byokStatus(),
+  ]);
+  const byokAllowed = Boolean(caps.ai?.byok_allowed);
   return (
     <>
       <header className="page-head">
@@ -15,8 +21,8 @@ export default async function SettingsPage() {
           <dt>Tenant</dt><dd>{me.tenant_id}</dd>
           <dt>API key ID</dt><dd><code>{me.key_id}</code></dd>
           <dt>Scopes</dt><dd>{me.scopes.join(", ")}</dd>
-          <dt>Cloud AI explanations</dt>
-          <dd>{me.cloud_ai_allowed ? "Allowed for this key (still requires per-analysis consent)" : "Not allowed for this key"}</dd>
+          <dt>Teger&apos;s AI key</dt>
+          <dd>{me.cloud_ai_allowed ? "Allowed for this API key (still requires per-analysis consent)" : "Not enabled for this API key"}</dd>
           <dt>API endpoint</dt><dd><code>{apiBase()}</code></dd>
         </dl>
         <p className="muted small">
@@ -24,6 +30,10 @@ export default async function SettingsPage() {
           and single sign-on are planned.
         </p>
         <DisconnectButton />
+      </section>
+      <section className="panel">
+        <h2>Teger Intelligence — bring your own key</h2>
+        <ByokForm initialHint={byok.hint} byokAllowed={byokAllowed} />
       </section>
     </>
   );

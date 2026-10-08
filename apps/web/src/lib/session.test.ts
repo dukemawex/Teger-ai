@@ -36,3 +36,25 @@ describe("session cookie", () => {
     expect(API_KEY_PATTERN.test(KEY + "\n")).toBe(false);
   });
 });
+
+describe("BYOK key handling", async () => {
+  const { BYOK_KEY_PATTERN, keyHint } = await import("./session");
+  const ANTHROPIC = "sk-ant-api03-" + "z".repeat(40) + "WXYZ";
+
+  it("accepts Anthropic keys and rejects others", () => {
+    expect(BYOK_KEY_PATTERN.test(ANTHROPIC)).toBe(true);
+    for (const bad of ["", "sk-proj-" + "a".repeat(40), "sk-ant-short", ANTHROPIC + "\n", ANTHROPIC + " x"]) {
+      expect(BYOK_KEY_PATTERN.test(bad)).toBe(false);
+    }
+  });
+
+  it("only reveals the last four characters", () => {
+    expect(keyHint(ANTHROPIC)).toBe("sk-ant-…WXYZ");
+  });
+
+  it("seals the key so the cookie does not contain it", () => {
+    const sealed = sealSession(ANTHROPIC);
+    expect(sealed).not.toContain("sk-ant");
+    expect(openSession(sealed)).toBe(ANTHROPIC);
+  });
+});

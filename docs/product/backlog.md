@@ -12,18 +12,18 @@ locally and in CI only. Production remains the legacy `backend/` + `extension/` 
 | Reputation | No live provider. URL analyses without strong heuristic evidence return `unknown`. The mock provider is test data only. |
 | Detection quality | Rule-based heuristics with unmeasured real-world precision/recall. Brand list has 17 brands; registrable-domain logic uses a small suffix list, not the full Public Suffix List. English-only language rules. |
 | Confidence | `confidence` is a rule-agreement score, not a calibrated probability. |
-| AI explanations | Disabled by default; never exercised against the live Anthropic API in this milestone. Cost figures are list-price estimates. |
+| AI explanations | BYOK is on by default; Teger's own key is off. Only the error path has been exercised against the live Anthropic API (a fake key was rejected); no successful live explanation has been run yet. Cost figures are list-price estimates. |
 | Redaction | Pattern-based, best-effort; names, addresses and free-form secrets are not detected. |
 | Dashboard | No user accounts/SSO; anyone with a tenant key can use it. No automated end-to-end tests in CI. |
 | Email | Text analysis only: no mailbox integration, header parsing, or SPF/DKIM/DMARC evaluation. |
 | Files | Hashing and local blocklist adapter only; no signature engine integration, no endpoint. |
-| Governance | `CONTRIBUTING.md` says OpenAI-only; the Claude adapter conflicts with it pending an owner decision. |
+| AI explanations (BYOK) | The console sends the user's Anthropic key to the Teger API only with consented explanation requests. The key is format-checked when saved, not validated with Anthropic until first use. |
 | Legacy | `SECURITY.md` supported-version table (1.x) does not match shipped 0.2. Per-IP limits in the legacy backend may see only the proxy address. |
 
 ## Backlog (prioritized)
 
 ### P0 — before any production use of the v1 API
-1. Owner decision on the AI-provider policy (keep Claude adapter or remove it); check grant terms.
+1. Confirm the BYOK decision against the OpenAI Cybersecurity Grant terms.
 2. PostgreSQL storage with tenant row isolation, retention, and deletion.
 3. Redis-backed rate limiting and shared AI usage budgets.
 4. API key lifecycle: create/rotate/revoke endpoints, expiry, pepper held in a secrets manager.

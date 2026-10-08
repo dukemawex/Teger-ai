@@ -32,7 +32,7 @@ alongside the unchanged v0.2 product:
 | `packages/contracts` | Typed contracts + JSON Schemas (analysis, endpoint, file scan, quarantine, email, Android, policy) | Experimental |
 | `packages/security-core` | URL normalization, SSRF guard, phishing / brand / credential / social-engineering detectors, deterministic policy, redaction | Experimental |
 | `services/api` | v1 FastAPI security API with tenant-scoped keys, rate limits, audit log | Experimental |
-| `services/ai-analyst` | Consent-gated Claude explanations (off by default; never changes a verdict) | Experimental |
+| `services/ai-analyst` | Consent-gated Claude explanations using the user's own Anthropic key (BYOK); never changes a verdict | Experimental |
 | `apps/web` | Next.js security console with honest module states | Experimental |
 | `ml/evaluation` | Phishing evaluation harness with provenance and leakage checks | Experimental |
 

@@ -25,8 +25,12 @@
 - [ ] Documentation updated for behavior/config changes
 
 ## AI Provider Policy
-All AI inference in Teger AI must go through OpenAI only.
-Do not add other AI providers.
+- The production v0.2 analyzer (`backend/`) uses OpenAI. Keep it on OpenAI.
+- Teger Intelligence explanations (`services/ai-analyst`) use Anthropic Claude through
+  **bring-your-own-key (BYOK)**: users supply their own Anthropic API key, which is used
+  per request and never stored or logged. A Teger-owned Anthropic key stays disabled
+  unless the maintainers explicitly enable it.
+- Do not add other AI providers without maintainer approval.
 
 ## Contributing Phishing Patterns
 

@@ -174,3 +174,4 @@ summary { cursor: pointer; color: var(--muted); }
   .row { grid-template-columns: 1fr; }
   table { display: block; overflow-x: auto; }
 }
+.button-row { display: flex; gap: 10px; flex-wrap: wrap; }

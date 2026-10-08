@@ -50,3 +50,11 @@ export function openSession(value: string | undefined, now = Date.now()): string
 }
 
 export const API_KEY_PATTERN = /^tgr_[a-z0-9]{12}_[A-Za-z0-9_-]{32,128}$/;
+
+/** Cookie holding the user's own Anthropic key (BYOK), sealed the same way as the session. */
+export const AI_KEY_COOKIE = "teger_ai_key";
+export const BYOK_KEY_PATTERN = /^sk-ant-[A-Za-z0-9_-]{20,250}$/;
+
+export function keyHint(key: string): string {
+  return `sk-ant-…${key.slice(-4)}`;
+}

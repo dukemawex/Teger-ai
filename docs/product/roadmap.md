@@ -10,6 +10,7 @@ owner approval. Statuses follow `docs/architecture/target-state.md`.
 - [x] `packages/security-core`: URL normalization, SSRF/network guard, detectors, policy engine, redaction, file-hash adapters
 - [x] `services/api`: v1 FastAPI with API-key auth, tenant isolation, scopes, rate limits, audit log, safe errors, OpenAPI
 - [x] `services/ai-analyst`: Claude explanation adapter (consent-gated, redacted, grounded, mocked tests)
+- [x] Bring-your-own Anthropic key (BYOK) across API and console
 - [x] `ml/evaluation`: phishing evaluation harness with provenance + leakage checks
 - [x] `apps/web`: Next.js dashboard with honest capability states
 - [x] CI: lint, tests (Python 3.11/3.12), eval harness, dependency audit, web checks
