@@ -12,7 +12,10 @@ owner approval. Statuses follow `docs/architecture/target-state.md`.
 - [x] `services/ai-analyst`: Claude explanation adapter (consent-gated, redacted, grounded, mocked tests)
 - [x] `ml/evaluation`: phishing evaluation harness with provenance + leakage checks
 - [x] `apps/web`: Next.js dashboard with honest capability states
-- [x] CI: lint, tests, eval harness, dependency audit
+- [x] CI: lint, tests (Python 3.11/3.12), eval harness, dependency audit, web checks
+
+Not in M1: browser-extension changes (moved to M2 so the published extension is not
+disturbed in the same review), live reputation intelligence, persistent storage.
 
 ## M2 — Browser protection on v1 (next)
 

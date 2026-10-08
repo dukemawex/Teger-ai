@@ -45,7 +45,7 @@ project makes **no** ASVS conformance claim).
 | T10 | Mock intelligence mistaken for live (T) | `mock_intelligence_used` flag; mock provider refused at startup when `TEGER_ENV=production` | `test_api_analysis.py` | V13 |
 | T11 | Unavailable intelligence treated as benign (T) | Policy yields `unknown` when a required detector is unavailable | `test_policy.py` | — |
 | T12 | Error detail leakage (I) | Global handler returns generic message + request ID; provider errors never echoed | `test_api_errors.py` | V16 |
-| T13 | Dashboard key theft via XSS (I) | Key held only in an `HttpOnly; SameSite=Strict` cookie set by the Next.js server; browser JS never sees it; CSP | manual review (see report) | V3 Web Frontend |
+| T13 | Dashboard key theft via XSS (I) | Key held only in an `HttpOnly; SameSite=Strict` cookie set by the Next.js server; browser JS never sees it; CSP | Playwright run + curl CSRF checks (test-report §3); `session.test.ts`, `csrf.test.ts` | V3 Web Frontend |
 | T14 | Evaluation leakage / live malware in samples (T) | Leakage checks across splits and against `dataset/patterns`; malicious samples must use reserved domains | `ml/evaluation` checks run in CI | — |
 | T15 | Supply chain (T) | `pip-audit` in CI, TruffleHog secret scan; actions pinned to SHAs is backlog | CI | V15 Secure Coding & Architecture |
 
