@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teger-security-core"
+version = "0.1.0"
+description = "Deterministic detection, URL safety, redaction and policy for Teger AI."
+requires-python = ">=3.10"
+dependencies = ["teger-contracts", "idna>=3.6,<4"]
+
+[tool.setuptools.packages.find]
+include = ["teger_security_core*"]
+
+[tool.setuptools.package-data]
+teger_security_core = ["data/*.json"]
