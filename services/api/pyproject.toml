@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teger-api"
+version = "0.1.0"
+description = "Teger AI v1 security API."
+requires-python = ">=3.10"
+dependencies = [
+  "teger-contracts",
+  "teger-security-core",
+  "teger-ai-analyst",
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.30,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["teger_api*"]
