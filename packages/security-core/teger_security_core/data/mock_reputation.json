@@ -1,0 +1,6 @@
+{
+  "_comment": "MOCK reputation fixture for offline tests. Reserved names only (RFC 2606/6761). Not threat intelligence.",
+  "malicious": ["malicious.example", "phish-kit.test", "known-bad.invalid"],
+  "suspicious": ["suspicious.example", "newly-registered.test"],
+  "unavailable": ["provider-outage.test"]
+}

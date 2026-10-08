@@ -1,0 +1,187 @@
+{
+  "$defs": {
+    "EndpointEventType": {
+      "enum": [
+        "process_start",
+        "file_created",
+        "file_modified",
+        "network_connection",
+        "detection",
+        "agent_health"
+      ],
+      "title": "EndpointEventType",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Telemetry emitted by the (planned) user-mode Windows agent.",
+  "properties": {
+    "agent_version": {
+      "maxLength": 32,
+      "title": "Agent Version",
+      "type": "string"
+    },
+    "detail": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Detail"
+    },
+    "device_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Device Id",
+      "type": "string"
+    },
+    "event_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "$ref": "#/$defs/EndpointEventType"
+    },
+    "file_path": {
+      "anyOf": [
+        {
+          "maxLength": 1024,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "File Path"
+    },
+    "file_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "File Sha256"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "parent_process_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Process Sha256"
+    },
+    "process_image_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Process Image Sha256"
+    },
+    "process_path": {
+      "anyOf": [
+        {
+          "maxLength": 1024,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Process Path"
+    },
+    "remote_host": {
+      "anyOf": [
+        {
+          "maxLength": 253,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Remote Host"
+    },
+    "remote_port": {
+      "anyOf": [
+        {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Remote Port"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity",
+      "default": "info"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "event_id",
+    "device_id",
+    "agent_version",
+    "observed_at",
+    "event_type"
+  ],
+  "title": "WindowsEndpointEvent",
+  "type": "object"
+}

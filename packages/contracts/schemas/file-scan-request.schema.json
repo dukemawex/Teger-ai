@@ -1,0 +1,85 @@
+{
+  "additionalProperties": false,
+  "description": "Hash-first scan request. Content upload is opt-in and size-capped.",
+  "properties": {
+    "content_upload_consent": {
+      "default": false,
+      "title": "Content Upload Consent",
+      "type": "boolean"
+    },
+    "file_name": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "File Name"
+    },
+    "mime_type": {
+      "anyOf": [
+        {
+          "maxLength": 127,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mime Type"
+    },
+    "request_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "maximum": 104857600,
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "source": {
+      "enum": [
+        "endpoint",
+        "email_attachment",
+        "browser_download",
+        "manual"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "request_id",
+    "sha256",
+    "size_bytes",
+    "source"
+  ],
+  "title": "FileScanRequest",
+  "type": "object"
+}

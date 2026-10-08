@@ -1,0 +1,145 @@
+{
+  "$defs": {
+    "PolicyRule": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/RecommendedAction"
+        },
+        "allow_user_override": {
+          "default": true,
+          "title": "Allow User Override",
+          "type": "boolean"
+        },
+        "applies_to": {
+          "enum": [
+            "browser",
+            "email",
+            "endpoint",
+            "android"
+          ],
+          "title": "Applies To",
+          "type": "string"
+        },
+        "on_verdict": {
+          "$ref": "#/$defs/Verdict"
+        },
+        "rule_id": {
+          "maxLength": 64,
+          "title": "Rule Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "applies_to",
+        "on_verdict",
+        "action"
+      ],
+      "title": "PolicyRule",
+      "type": "object"
+    },
+    "RecommendedAction": {
+      "enum": [
+        "block",
+        "warn",
+        "caution",
+        "allow"
+      ],
+      "title": "RecommendedAction",
+      "type": "string"
+    },
+    "Verdict": {
+      "enum": [
+        "malicious",
+        "suspicious",
+        "no_threat_detected",
+        "unknown"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Signed, versioned policy distributed to clients. Clients MUST verify the signature\nand reject bundles with a lower version than the one already applied (rollback).",
+  "properties": {
+    "allowed_domains": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10000,
+      "title": "Allowed Domains",
+      "type": "array"
+    },
+    "blocked_domains": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10000,
+      "title": "Blocked Domains",
+      "type": "array"
+    },
+    "cloud_ai_allowed": {
+      "default": false,
+      "title": "Cloud Ai Allowed",
+      "type": "boolean"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "issued_at": {
+      "format": "date-time",
+      "title": "Issued At",
+      "type": "string"
+    },
+    "policy_id": {
+      "maxLength": 64,
+      "title": "Policy Id",
+      "type": "string"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/PolicyRule"
+      },
+      "maxItems": 500,
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Signature",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "policy_id",
+    "version",
+    "issued_at",
+    "expires_at",
+    "rules",
+    "signature"
+  ],
+  "title": "EnterprisePolicyBundle",
+  "type": "object"
+}

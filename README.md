@@ -22,6 +22,28 @@ Teger AI is an explainable social-engineering defense layer for suspicious email
 
 See docs/architecture.md.
 
+## Platform foundation (v1, experimental — not deployed)
+
+Teger AI is growing into a modular security suite. The first platform milestone adds,
+alongside the unchanged v0.2 product:
+
+| Path | What it is | Status |
+|---|---|---|
+| `packages/contracts` | Typed contracts + JSON Schemas (analysis, endpoint, file scan, quarantine, email, Android, policy) | Experimental |
+| `packages/security-core` | URL normalization, SSRF guard, phishing / brand / credential / social-engineering detectors, deterministic policy, redaction | Experimental |
+| `services/api` | v1 FastAPI security API with tenant-scoped keys, rate limits, audit log | Experimental |
+| `services/ai-analyst` | Consent-gated Claude explanations using the user's own Anthropic key (BYOK); never changes a verdict | Experimental |
+| `apps/web` | Next.js security console with honest module states | Experimental |
+| `ml/evaluation` | Phishing evaluation harness with provenance and leakage checks | Experimental |
+
+Quick start: `make install && make test`, then `make api` and `cd apps/web && npm run dev`.
+
+Docs: [current state](docs/architecture/current-state.md) ·
+[target architecture](docs/architecture/target-state.md) ·
+[roadmap](docs/product/roadmap.md) · [backlog & limitations](docs/product/backlog.md) ·
+[threat model](docs/security/threat-model.md) · [test report](docs/security/test-report.md) ·
+[deployment](docs/deployment.md) · [contracts](docs/contracts/README.md)
+
 ## Quick Start
 
 ### Prerequisites
