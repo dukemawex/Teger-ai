@@ -1,0 +1,8 @@
+# Platform (v1) packages, installed editable for local development and CI.
+-e packages/contracts
+-e packages/security-core
+-e services/ai-analyst
+-e services/api
+pytest>=8,<9
+httpx>=0.27,<1
+flake8>=7,<8

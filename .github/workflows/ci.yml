@@ -61,3 +61,61 @@ jobs:
       - run: pip install pytest
       - run: python dataset/schema.py
       - run: python -m pytest -q dataset/
+
+  platform-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-platform.txt
+      - run: flake8 packages/ services/ ml/ --max-line-length=120
+      - run: python -m teger_contracts.export_schemas --check
+
+  platform-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements-platform.txt
+      - run: python -m pytest -q packages services ml/evaluation
+
+  phishing-eval:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-platform.txt
+      - run: python ml/evaluation/harness.py --check-only
+      - run: python ml/evaluation/harness.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phishing-eval-report
+          path: ml/evaluation/reports/latest.json
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-platform.txt pip-audit
+      - run: pip-audit -r backend/requirements.txt
+      - run: pip-audit --skip-editable
