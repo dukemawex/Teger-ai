@@ -130,6 +130,10 @@ See docs/api-reference.md.
 
 See SECURITY.md and docs/threat-model.md.
 
+## Creator
+
+Teger AI is created by [Emmanuel Effiom Duke](https://duker.me/about/), AI engineer, researcher and founder of [Dukers LTD](https://dukersltd.com/).
+
 ## License
 
 MIT — See LICENSE.
