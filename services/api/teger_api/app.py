@@ -28,6 +28,7 @@ from teger_security_core.policy import MALICIOUS_THRESHOLD, POLICY_VERSION, SUSP
 
 from .audit import AuditLog, configure_logging
 from .capabilities import capabilities
+from .investigations import mount_investigations
 from .keys import ApiKeyStore, Principal
 from .ratelimit import SlidingWindowLimiter
 from .settings import ApiSettings
@@ -246,6 +247,9 @@ def create_app(
             "ai_analyst": "configured" if analyst.available else "disabled",
             "ai_byok": "allowed" if analyst.byok_available else "disabled",
             "storage": "in_memory",
+            "investigation_storage": "sqlite" if settings.db_path else "in_memory",
+            "fetch_worker": "configured" if settings.fetch_worker_url else "not_configured",
+            "public_demo": "enabled" if settings.demo_enabled else "disabled",
             "rate_limiter": "in_memory",
         }
         ready = len(keys) > 0
@@ -375,4 +379,6 @@ def create_app(
     ):
         return audit.recent(principal.tenant_id, limit)
 
+    mount_investigations(app, settings, authenticate, require,
+                         lambda request: _client_ip(request, settings.trust_proxy_headers), analyst)
     return app

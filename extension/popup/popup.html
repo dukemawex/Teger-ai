@@ -64,10 +64,24 @@
         <p id="feedback-status" class="microcopy"></p>
       </section>
 
+      <section class="page-check" aria-labelledby="page-check-title">
+        <h2 id="page-check-title" class="label">Check this page</h2>
+        <p class="microcopy">Sends only this tab's address to your Teger console, where you start an investigation.
+          Nothing is sent until you press the button. Teger does not block pages automatically, and an investigation
+          can finish after you have acted — check before typing anything sensitive.</p>
+        <label class="microcopy" for="console-base">Teger console address</label>
+        <input id="console-base" type="url" placeholder="https://console.your-company.example" autocomplete="off" />
+        <label class="microcopy check-row"><input id="include-query" type="checkbox" />
+          Include the query string (it can contain tokens; off by default)</label>
+        <button id="check-page-btn" class="secondary">Check this page</button>
+        <p id="page-check-status" class="microcopy" role="status"></p>
+      </section>
+
       <p class="privacy-note">
         Teger sends only the message you explicitly choose to scan. Scan history stored by the extension excludes raw message text.
       </p>
     </main>
+    <script src="pagecheck.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

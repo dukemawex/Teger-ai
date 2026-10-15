@@ -22,6 +22,20 @@ Teger AI is an explainable social-engineering defense layer for suspicious email
 
 See docs/architecture.md.
 
+## Investigation workspace & public demo (M2, experimental — not deployed)
+
+`apps/web` now contains a public landing page, a fixture-only interactive demo (`/demo`) and an
+investigation workspace (`/app`): submit a suspicious message or URL → Teger opens a case, runs
+bounded checks, compares findings with **approved business context** (suppliers, services, identity
+providers), and proposes responses that a person must approve. Engine:
+[`services/investigator`](services/investigator). Details, real-vs-demo capabilities, test results
+and release plan: [docs/product/investigation-workspace.md](docs/product/investigation-workspace.md) ·
+[demo script](docs/product/demo-script.md) · [art direction](docs/design/alexandrian-atlas.md) ·
+[asset manifest](docs/design/asset-manifest.md) · [screenshots](docs/screenshots).
+
+The live website `tegerai.tech` is a separate v0/Vercel project and is **not** served from this
+repository; this work does not change it.
+
 ## Platform foundation (v1, experimental — not deployed)
 
 Teger AI is growing into a modular security suite. The first platform milestone adds,

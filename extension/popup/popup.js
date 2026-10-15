@@ -151,4 +151,38 @@ scanBtn.addEventListener("click", async () => {
   );
 });
 
+
+// ---------------------------------------------------------------- Check this page
+// Uses only the activeTab grant from opening the popup: no history, cookies or page
+// content are read. The URL goes to the reviewer's own Teger console, not to a backend.
+const consoleBaseEl = document.getElementById("console-base");
+const includeQueryEl = document.getElementById("include-query");
+const checkPageBtn = document.getElementById("check-page-btn");
+const pageCheckStatusEl = document.getElementById("page-check-status");
+
+async function loadConsoleBase() {
+  const { consoleBase } = await chrome.storage.local.get("consoleBase");
+  if (consoleBase) consoleBaseEl.value = consoleBase;
+}
+
+checkPageBtn.addEventListener("click", async () => {
+  pageCheckStatusEl.textContent = "";
+  const base = validConsoleBase(consoleBaseEl.value.trim());
+  if (!base) {
+    pageCheckStatusEl.textContent = "Enter your Teger console address (https).";
+    return;
+  }
+  await chrome.storage.local.set({ consoleBase: base });
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const target = tab?.url ? pageUrlForCheck(tab.url, includeQueryEl.checked) : null;
+  if (!target) {
+    pageCheckStatusEl.textContent = "This page cannot be checked (only http and https pages).";
+    return;
+  }
+  const next = `${base}/app/analyze?from=extension&url=${encodeURIComponent(target)}`;
+  await chrome.tabs.create({ url: next });
+  pageCheckStatusEl.textContent = "Opened your Teger console. Review the address and start the investigation there.";
+});
+
 loadCapturedMessage();
+loadConsoleBase();

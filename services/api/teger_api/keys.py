@@ -3,7 +3,10 @@
 Token format: ``tgr_<key_id>_<secret>``. Only the SHA-256 digest of the 256-bit random
 secret is stored. Generate a key with::
 
-    python -m teger_api.keys --tenant acme --scopes analyses:read,analyses:write
+    python -m teger_api.keys --tenant acme --scopes analyses:read,analyses:write,cases:read,cases:write
+
+Add ``context:write`` and ``actions:approve`` only for reviewers who may change trusted
+context or approve responses.
 """
 from __future__ import annotations
 
@@ -16,7 +19,13 @@ import secrets
 from dataclasses import dataclass
 from pathlib import Path
 
-SCOPES = frozenset({"analyses:read", "analyses:write"})
+SCOPES = frozenset({
+    "analyses:read", "analyses:write",
+    "cases:read", "cases:write",  # investigations
+    "context:write",  # approve/revoke trusted business context
+    "actions:approve",  # approve, reject and execute proposed responses
+})
+DEFAULT_SCOPES = "analyses:read,analyses:write,cases:read,cases:write"
 _KEY_ID = re.compile(r"[a-z0-9]{12}")
 _TENANT = re.compile(r"[a-z0-9][a-z0-9-]{0,62}")
 _TOKEN = re.compile(r"tgr_([a-z0-9]{12})_([A-Za-z0-9_-]{32,128})")
@@ -107,7 +116,7 @@ def generate_key(tenant_id: str, scopes: list[str], cloud_ai_allowed: bool = Fal
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate a Teger API key.")
     parser.add_argument("--tenant", required=True)
-    parser.add_argument("--scopes", default="analyses:read,analyses:write")
+    parser.add_argument("--scopes", default=DEFAULT_SCOPES)
     parser.add_argument("--cloud-ai-allowed", action="store_true")
     parser.add_argument("--label", default="")
     args = parser.parse_args(argv)

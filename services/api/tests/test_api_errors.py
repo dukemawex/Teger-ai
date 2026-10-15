@@ -42,6 +42,6 @@ def test_request_id_echoed_only_when_well_formed(client):
     assert injected != "bad id\r\nx" and len(injected) == 32
 
 
-def test_hsts_in_production(make_client):
-    c = make_client(environment="production", reputation_provider="none")
+def test_hsts_in_production(make_client, tmp_path):
+    c = make_client(environment="production", reputation_provider="none", db_path=str(tmp_path / "t.db"))
     assert "max-age" in c.get("/healthz").headers["strict-transport-security"]

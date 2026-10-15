@@ -186,3 +186,7 @@ button:disabled {
   border-top: 1px solid #172a45;
   padding-top: 11px;
 }
+
+.page-check { border-top: 1px solid rgba(148, 163, 184, 0.3); margin-top: 14px; padding-top: 12px; display: grid; gap: 6px; }
+.page-check input[type="url"] { width: 100%; padding: 7px 8px; border-radius: 4px; border: 1px solid #94a3b8; font: inherit; }
+.page-check .check-row { display: flex; gap: 6px; align-items: flex-start; }

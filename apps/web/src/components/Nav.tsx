@@ -1,24 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const LINKS: [string, string][] = [
-  ["/", "Overview"],
-  ["/analyze", "Threat analysis"],
-  ["/incidents", "Incident history"],
-  ["/events", "Security events"],
-  ["/protection", "Protection status"],
-  ["/devices", "Devices"],
-  ["/policies", "Policies"],
-  ["/settings", "Settings"],
+  ["/app", "Overview"],
+  ["/app/analyze", "Start an investigation"],
+  ["/app/context", "Approved context"],
+  ["/app/activity", "Activity & audit"],
+  ["/app/analyses", "Quick analyses"],
+  ["/app/settings", "Settings"],
 ];
 
 export function Nav() {
+  const pathname = usePathname();
   return (
-    <nav className="nav" aria-label="Main">
-      {LINKS.map(([href, label]) => (
-        <Link key={href} href={href}>
-          {label}
-        </Link>
-      ))}
+    <nav aria-label="Workspace">
+      {LINKS.map(([href, label]) => {
+        const current = href === "/app" ? pathname === "/app" : pathname.startsWith(href) ||
+          (href === "/app/analyze" && pathname.startsWith("/app/cases"));
+        return (
+          <Link key={href} href={href} aria-current={current ? "page" : undefined}>{label}</Link>
+        );
+      })}
     </nav>
   );
 }

@@ -25,8 +25,9 @@ def test_openapi_documents_v1_routes(client):
     assert {"/v1/analyses", "/v1/analyses/{analysis_id}", "/healthz", "/readyz"} <= set(paths)
 
 
-def test_docs_hidden_in_production(make_client):
-    c = make_client(environment="production", reputation_provider="none", expose_docs=False)
+def test_docs_hidden_in_production(make_client, tmp_path):
+    c = make_client(environment="production", reputation_provider="none", expose_docs=False,
+                    db_path=str(tmp_path / "t.db"))
     assert c.get("/openapi.json").status_code == 404 and c.get("/docs").status_code == 404
 
 
@@ -58,3 +59,8 @@ def test_ai_capability_unavailable_without_server_key_or_byok(make_client):
     modules = {m["id"]: m["status"] for m in caps["modules"]}
     assert modules["ai_explanations"] == "unavailable"
     assert caps["ai"] == {"server_key": False, "byok_allowed": False}
+
+
+def test_production_requires_durable_storage():
+    with pytest.raises(ConfigurationError):
+        ApiSettings.from_env({"TEGER_ENV": "production"})

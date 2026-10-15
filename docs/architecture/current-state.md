@@ -69,7 +69,7 @@ URLs exists, so no SSRF surface today), sensitive-data redaction before the LLM 
   `backend/` rather than the repo root; how the Render service is wired to it is not
   visible from the repo.
 - No container image, no IaC, no staging environment, no secrets manager integration.
-- Website `tegerai.tech` is not in this repository.
+- Website `tegerai.tech` is not in this repository (a v0.app project on Vercel). `apps/web` now contains a candidate replacement landing page and demo; see docs/product/investigation-workspace.md.
 
 ## 7. Tests and CI/CD
 

@@ -11,6 +11,7 @@ dependencies = [
   "teger-contracts",
   "teger-security-core",
   "teger-ai-analyst",
+  "teger-investigator",
   "fastapi>=0.115,<1",
   "uvicorn>=0.30,<1",
 ]

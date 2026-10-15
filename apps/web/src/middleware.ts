@@ -1,15 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/connect", "/api/session"];
+// Everything else (the public site, /demo and its fixture-only proxy) needs no session.
+// The session check here is a convenience redirect; every protected route handler and the
+// API itself still authenticate each request.
+const PROTECTED_PATHS = ["/app", "/api/live", "/api/analyses", "/api/byok"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = Boolean(request.cookies.get("teger_session")?.value);
-  if (!hasSession && !PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+  if (!hasSession && PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ detail: "Not connected." }, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/connect", request.url));
+    const target = new URL("/connect", request.url);
+    target.searchParams.set("next", pathname);
+    return NextResponse.redirect(target);
   }
 
   // Per-request nonce CSP; Next.js applies the nonce to its own scripts.

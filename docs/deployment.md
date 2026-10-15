@@ -55,7 +55,27 @@ cd apps/web && npm ci && npm run build && npm start   # port 3100
 
 Serve over HTTPS only (the session cookie is `Secure` in production).
 
-## 4. Legacy stack (unchanged)
+## 4. Investigations, public demo and fetch worker (M2, experimental — not deployed)
+
+See [product/investigation-workspace.md](product/investigation-workspace.md) for the full design,
+environment variables, test results and release/rollback plan. Production essentials:
+
+| Setting | Production value |
+|---|---|
+| `TEGER_DB_PATH` | SQLite file on a **persistent** volume (startup fails without it in production) |
+| `TEGER_DEMO_ENABLED` | `true` to serve `/demo` (fixtures only, per-IP rate limited) |
+| `TEGER_FETCH_WORKER_URL` / `_TOKEN` | Only when the fetch worker is deployed separately with restricted egress |
+
+The fetch worker (`uvicorn teger_investigator.worker:app`) must run as its own service with outbound
+network access limited to the public internet — block RFC1918, CGNAT, link-local (including
+169.254.169.254), loopback and internal service names at the network layer, in addition to the
+application checks. Never co-locate it with the API or give it secrets other than its token.
+
+The web app now serves the public landing page at `/`, the demo at `/demo` and the workspace at
+`/app`. Attaching `tegerai.tech` to it replaces the current v0 site and needs owner approval;
+roll back by re-attaching the domain to the previous Vercel project.
+
+## 5. Legacy stack (unchanged)
 
 See the README sections for `backend/`, `dashboard/`, and `extension/`. The Render
 blueprint remains `backend/render.yaml`.
