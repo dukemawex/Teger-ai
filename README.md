@@ -2,7 +2,7 @@
 
 # Teger AI 🛡️
 
-**MVP v0.2 — Private Beta**
+**MVP v0.2 — Private Beta** · 🌐 Website: [tegerai.tech](https://www.tegerai.tech)
 
 Teger AI is an explainable social-engineering defense layer for suspicious email and chat messages. It detects manipulation tactics, surfaces the concrete cues behind the warning, and gives the user a safe next action.
 
