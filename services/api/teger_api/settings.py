@@ -36,6 +36,8 @@ class ApiSettings:
     cors_origins: tuple[str, ...] = field(default_factory=tuple)
     expose_docs: bool = True
     max_analyses_per_tenant: int = 500
+    public_scan_enabled: bool = False
+    public_scan_limit_per_minute: int = 60
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "ApiSettings":
@@ -58,11 +60,15 @@ class ApiSettings:
             cors_origins=_csv(env.get("TEGER_CORS_ORIGINS")),
             expose_docs=_bool(env.get("TEGER_EXPOSE_DOCS"), default=environment != "production"),
             max_analyses_per_tenant=int(env.get("TEGER_MAX_ANALYSES_PER_TENANT", "500")),
+            public_scan_enabled=_bool(env.get("TEGER_PUBLIC_SCAN_ENABLED")),
+            public_scan_limit_per_minute=int(env.get("TEGER_PUBLIC_SCAN_LIMIT_PER_MINUTE", "60")),
         )
         settings.validate()
         return settings
 
     def validate(self) -> None:
+        if self.public_scan_limit_per_minute < 1:
+            raise ConfigurationError("TEGER_PUBLIC_SCAN_LIMIT_PER_MINUTE must be positive.")
         if self.environment == "production" and self.reputation_provider == "mock":
             raise ConfigurationError("The mock reputation provider cannot be used when TEGER_ENV=production.")
         if "*" in self.cors_origins:

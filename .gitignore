@@ -14,3 +14,7 @@ dataset/export.json
 .next/
 ml/evaluation/reports/
 *.tsbuildinfo
+.venv/
+**/.env.local
+**/playwright-report/
+**/test-results/

@@ -1,7 +1,20 @@
-# Teger AI Security Console (apps/web) — Experimental
+# Teger AI public website and security console (apps/web)
 
-Next.js 15 dashboard for the v1 API (`services/api`). It replaces nothing yet: the
-legacy CRA console in `dashboard/` keeps serving the v0.2 backend until cut-over.
+Next.js 15 public website and investigation desk, plus the experimental private
+console for the v1 API (`services/api`). The separately hosted marketing site and
+legacy CRA console are not changed by a repository commit. See
+[public launch guide](../../docs/public-launch.md) for deployment and cut-over.
+
+## Public scanner
+
+Run the API with `TEGER_PUBLIC_SCAN_ENABLED=true TEGER_REPUTATION_PROVIDER=none`.
+Set `TEGER_API_URL` in the web app, then visit `/scan`. No account or AI key is needed.
+The scanner calls the real Python engine through a same-origin, size-limited server
+route; it never substitutes synthetic results when the backend is unavailable.
+Public analyses are not saved to private tenant history and cannot use cloud AI.
+
+Public routes: `/`, `/scan`, `/method`, `/privacy`. The private console now starts at
+`/overview`; its existing `/analyze`, `/incidents`, and other routes remain protected.
 
 ## Run locally
 
@@ -15,7 +28,7 @@ make api                                        # http://127.0.0.1:8100
 cd apps/web && cp .env.example .env.local && npm ci && npm run dev   # http://localhost:3100
 ```
 
-Open the console, paste the `tgr_…` token on the Connect screen.
+Open `/connect`, paste the `tgr_…` token, and continue to `/overview`.
 
 ## Security design
 
@@ -36,11 +49,24 @@ Open the console, paste the `tgr_…` token on the Connect screen.
 npm run typecheck && npm test && npm run build && npm audit --omit=dev
 ```
 
+End-to-end smoke test (requires platform dependencies in the root `.venv`):
+
+```bash
+npx playwright install chromium
+npm run build
+npm run test:e2e
+```
+
+The smoke test starts its own production web server and real Python API on ports
+3199/8199, verifies actual scans, report download, input rendering, protected routes,
+legacy redirects, 320/390px layouts, CSP and backend outages, then stops both servers.
+Set `TEGER_TEST_BROWSER` to use an existing Chromium executable, or
+`TEGER_TEST_ARTIFACTS` to save screenshots. `TEGER_TEST_PYTHON` overrides the Python path.
+
 `postcss` is pinned via `overrides` to a patched 8.5.x because Next 15.5 bundles an
 older version with published advisories.
 
 ## Known limitations
 
-No user accounts or SSO (API-key session only); history depends on the API's in-memory
-store; no end-to-end test suite in CI yet (manual Playwright run documented in
-`docs/security/test-report.md`).
+No user accounts or SSO (API-key session only); private history depends on the API's
+in-memory store. The public smoke test is available locally; it is not yet a CI job.

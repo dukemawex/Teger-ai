@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "node scripts/smoke-public.mjs"
   },
   "dependencies": {
     "next": "15.5.27",
@@ -19,6 +20,7 @@
     "@types/node": "22.20.4",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
+    "playwright": "1.62.1",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
   },

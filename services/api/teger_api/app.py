@@ -30,6 +30,7 @@ from .audit import AuditLog, configure_logging
 from .capabilities import capabilities
 from .keys import ApiKeyStore, Principal
 from .ratelimit import SlidingWindowLimiter
+from .public import public_router
 from .settings import ApiSettings
 from .store import AnalysisStore
 
@@ -173,6 +174,7 @@ def create_app(
         return response
 
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
+    app.include_router(public_router(settings))
 
     # ------------------------------------------------------------------ errors
 
