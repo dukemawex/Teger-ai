@@ -21,7 +21,7 @@ export function ConnectForm() {
         const body = await response.json().catch(() => ({}));
         throw new Error(body?.detail || "Could not connect.");
       }
-      window.location.href = "/";
+      window.location.href = "/overview";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not connect.");
       setLoading(false);

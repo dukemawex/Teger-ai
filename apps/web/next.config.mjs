@@ -2,6 +2,17 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  async redirects() {
+    // Preserve known entry points from the separately hosted prototype on cut-over.
+    return [
+      { source: "/demo", destination: "/scan", permanent: true },
+      { source: "/demo/context", destination: "/method", permanent: true },
+      { source: "/features", destination: "/method", permanent: true },
+      { source: "/how-it-works", destination: "/method", permanent: true },
+      { source: "/security", destination: "/method", permanent: true },
+      { source: "/tactics", destination: "/method", permanent: true },
+    ];
+  },
   async headers() {
     // The Content-Security-Policy header is set per request (with a nonce) in src/middleware.ts.
     return [

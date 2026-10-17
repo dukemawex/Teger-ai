@@ -22,6 +22,21 @@ Teger AI is an explainable social-engineering defense layer for suspicious email
 
 See docs/architecture.md.
 
+## Public investigation desk (ready for deployment; not yet live)
+
+`apps/web` now includes a public website and an account-free message / URL scanner
+backed by the existing Python detection engine. Visitors can inspect evidence,
+coverage and recommended actions, download a report, or copy a verification note.
+Fictional examples populate the input and are evaluated by the same real engine.
+
+This scanner analyzes submitted text and URL structure. It does **not** visit the
+website, query live threat intelligence, invoke cloud AI, or block anything. Public
+results are stateless and separate from private console history. The console is
+still available at `/overview` after connecting an API key.
+
+See [public launch guide](docs/public-launch.md) for local startup, Vercel + API
+configuration, deployment checks and the remaining live-domain cut-over.
+
 ## Platform foundation (v1, experimental — not deployed)
 
 Teger AI is growing into a modular security suite. The first platform milestone adds,

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const LINKS: [string, string][] = [
-  ["/", "Overview"],
+  ["/overview", "Overview"],
   ["/analyze", "Threat analysis"],
   ["/incidents", "Incident history"],
   ["/events", "Security events"],
